@@ -8,7 +8,8 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,8 +28,17 @@ public class Bill implements Serializable {
     @CreatedDate
     private LocalDateTime createTime;
 
+    /**
+     * Map sang bill trong {@link RentedBook#bill}
+     */
+    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<RentedBook> rentedBooks;
 
+    /**
+     * Map sang {@link List} {@link Staff#bill} trong {@link Staff}
+     */
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH})
+    @JoinColumn(name = "staff_id", referencedColumnName = "id", nullable = false)
     private Staff staff;
 
 }
