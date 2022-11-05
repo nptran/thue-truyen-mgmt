@@ -13,13 +13,16 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "User")
+@Table(name = "user")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public class User implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column
+    private String loginCode;
 
     @Column(name = "date_of_birth")
     private LocalDate dob;

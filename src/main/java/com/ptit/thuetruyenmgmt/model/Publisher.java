@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Publisher")
+@Table(name = "publisher")
 public class Publisher implements Serializable {
 
     @Id

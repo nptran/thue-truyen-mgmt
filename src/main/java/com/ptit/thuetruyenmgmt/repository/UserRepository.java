@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository<T extends User> extends JpaRepository<T, Integer> {
 
     //    @Query(value = "CALL FIND_USER_BY_CODE(:code);", nativeQuery = true)
-    T findByCode(String code);
+    T findByLoginCode(String code);
 
 }

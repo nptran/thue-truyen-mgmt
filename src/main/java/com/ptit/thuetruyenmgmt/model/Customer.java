@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Customer")
+@Table(name = "customer")
 public class Customer implements Serializable {
 
     @Id
@@ -38,5 +39,11 @@ public class Customer implements Serializable {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "address_id")
     private Address address;
+
+    /**
+     * Map sang customer trong {@link RentedBook#customer}
+     */
+    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<RentedBook> rentedBooks;
 
 }

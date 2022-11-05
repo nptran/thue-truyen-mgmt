@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -11,7 +12,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "BookTitle")
+@Table(name = "book_title")
 public class BookTitle implements Serializable {
 
     @Id
@@ -42,5 +43,11 @@ public class BookTitle implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH})
     @JoinColumn(name = "publisher_id", referencedColumnName = "id", nullable = false)
     private Publisher publisher;
+
+    /**
+     * Map sang bookTitle trong {@link RentedBook#bookTitle}
+     */
+    @OneToMany(mappedBy = "bookTitle", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<RentedBook> rentedBooks;
 
 }

@@ -15,7 +15,7 @@ public class StaffServiceImpl implements StaffService {
 
     @Override
     public Staff login(String code) {
-        return repository.findByCode(code);
+        return repository.findByLoginCode(code);
     }
 
 }

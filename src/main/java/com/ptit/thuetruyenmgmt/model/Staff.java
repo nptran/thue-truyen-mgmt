@@ -3,14 +3,14 @@ package com.ptit.thuetruyenmgmt.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Builder
 public class Staff extends User {
 
     @Column
@@ -21,5 +21,11 @@ public class Staff extends User {
      */
     @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Bill> bills;
+
+    @Builder(builderMethodName = "staffBuilder")
+    public Staff(int id, String loginCode, LocalDate dob, String email, String phone, FullName fullName, String position) {
+        super(id, loginCode, dob, email, phone, fullName);
+        this.position = position;
+    }
 
 }

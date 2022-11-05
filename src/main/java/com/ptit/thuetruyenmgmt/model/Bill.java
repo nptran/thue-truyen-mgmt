@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Bill")
+@Table(name = "bill")
 public class Bill implements Serializable {
 
     @Id
@@ -31,7 +31,7 @@ public class Bill implements Serializable {
     /**
      * Map sang bill trong {@link RentedBook#bill}
      */
-    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "bill", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<RentedBook> rentedBooks;
 
     /**
