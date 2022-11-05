@@ -19,9 +19,20 @@ public class Address implements Serializable {
     private int id;
 
     @Column
-    private String fName;
+    private String street;
 
     @Column
-    private String lName;
+    private String district;
 
+    @Column
+    private String city;
+
+    @Override
+    public String toString() {
+        String street_str = street.trim().isEmpty() ? "" : street.trim() + ", ";
+        String district_str = district.trim().isEmpty() ? "" : district.trim() + ", ";
+        String city_str = city.trim().isEmpty() ? "" : city.trim();
+
+        return street_str + district_str + city_str;
+    }
 }

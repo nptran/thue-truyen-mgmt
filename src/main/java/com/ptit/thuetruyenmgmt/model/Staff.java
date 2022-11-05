@@ -11,10 +11,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+//@Table(name = "staff")
+@DiscriminatorValue("1")
 public class Staff extends User {
 
-    @Column
-    private String position;
+    @Column(columnDefinition = "VARCHAR(50) DEFAULT 'THU_NGAN'", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private StaffPosition position;
 
     /**
      * Map sang staff trong {@link Bill#staff}
@@ -23,8 +26,8 @@ public class Staff extends User {
     private List<Bill> bills;
 
     @Builder(builderMethodName = "staffBuilder")
-    public Staff(int id, String loginCode, LocalDate dob, String email, String phone, FullName fullName, String position) {
-        super(id, loginCode, dob, email, phone, fullName);
+    public Staff(int id, String loginCode, LocalDate dob, String email, String phone, FullName fullName, Address address, StaffPosition position) {
+        super(id, loginCode, dob, email, phone, fullName, address);
         this.position = position;
     }
 

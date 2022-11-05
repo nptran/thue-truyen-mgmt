@@ -30,6 +30,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<Customer> getCustomerByName(String name) {
-        return repository.findByFullName(name);
+        return repository.findByName(name);
+    }
+
+    @Override
+    public Customer createCustomer(Customer customer) {
+        return repository.save(customer);
     }
 }

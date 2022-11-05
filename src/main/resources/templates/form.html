@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: common-header"></head>
+<body>
+    <div class="header-nightsky">
+		<nav th:replace="fragments/layout :: header"></nav>
+
+	    <div class="hero form" style="margin:auto;">
+	        <div class="row">
+		        <form action="#" th:action="@{/student/save}" th:object="${student}"
+				    method="POST" novalidate="novalidate">
+				    <h2 style="font-size: 47px; margin-top: 0; margin-bottom: 20px">Đăng Nhập</h2>
+				    <input type="hidden" th:field="*{id}" />
+				    <div class="form-group">
+				        <label>Tên</label> 
+				        <input type="text" class="form-control" th:field="*{name}" placeholder="Đánh tên vào đây..."/> 
+				        <span class="label label-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Lỗi nhập tên</span>
+				    </div>
+				    <div class="form-group">
+				        <label>Lớp</label> 
+				        <input type="text" class="form-control" th:field="*{group}" placeholder="Đánh lớp vào đây..."/>
+				        <span class="label label-danger" th:if="${#fields.hasErrors('group')}" th:errors="*{group}">Lỗi nhập lớp</span>
+				    </div>
+				    <div class="form-group">
+				        <label>Tuổi</label> 
+				        <input type="text" class="form-control" th:field="*{age}" placeholder="Nhập tuổi chỗ này..."/>
+                        <span class="label label-danger" th:if="${#fields.hasErrors('age')}" th:errors="*{age}">Lỗi nhập tuổi</span>
+				    </div>
+				    <button type="submit" class="btn btn-primary" style="margin-right:0px">Lưu</button>
+				</form>
+	    	</div><!-- /.container -->
+    	</div><!-- /.hero -->
+    </div><!-- /.header-nightsky -->
+
+</body>
+</html>

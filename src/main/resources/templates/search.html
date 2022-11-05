@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: common-header"></head>
+<body>
+<div class="header-nightsky">
+    <nav th:replace="fragments/layout :: header"></nav>
+    <div class="hero list" style="margin: 0px auto 20px auto;">
+        <h1 style="color: #313131;">Tìm Kiếm Khách Hàng</h1>
+        <div th:if="${success}" class="row alert alert-success alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert"
+                    aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+            <span th:text="${success}"></span>
+        </div>
+        <div class="row">
+            <a th:href="@{/home}" class="btn btn-warning pull-left">
+                <span class="fas fa-plus-circle"></span> Quay Lại
+            </a>
+            <form class="form-inline pull-right" action="#"
+                  th:action="@{/customer/search}" method="GET">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="kw-name"
+                           placeholder="Nhập tên để tìm..."/>
+                </div>
+                <button type="submit" class="btn btn-success">Tìm</button>
+            </form>
+        </div>
+
+        <!--    BẢNG DS KHÁCH HÀNG TÌM KIẾM-->
+        <!--    NẾU KẾT QUẢ TRỐNG-->
+        <th:block th:if="${#lists.isEmpty(customers)}">
+            <h3>Danh sách hiện trống! Vui lòng Xác nhận tên của Khách hàng!</h3>
+        </th:block>
+
+        <!--        NẾU CÓ KẾT QUẢ-->
+        <th:block th:unless="${#lists.isEmpty(customers)}">
+            <div class="row">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Họ Tên</th>
+                        <th>Mã CCCD</th>
+                        <th>Địa Chỉ</th>
+                        <th>Ngày Sinh</th>
+                        <th>Số Điện Thoại</th>
+                        <th>Email</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <th:block th:each="customer,iterStat : ${customers}">
+                        <tr th:ondblclick="|window.location.href='/customer/rented-books=${customer.id}'|">
+                            <td th:text="${iterStat.count}"></td>
+                            <td th:text="${customer.fullName.toString()}"></td>
+                            <td th:text="${customer.cccd}"></td>
+                            <td th:text="${customer.address.toString()}"></td>
+                            <td th:text="${customer.dob}"></td>
+                            <td th:text="${customer.phone}"></td>
+                            <td th:text="${customer.email}"></td>
+                            <td><a th:href="@{/customer/rented-books={id}(id=${customer.id})}"><span
+                                    class="glyphicon glyphicon-pencil"></span></a></td>
+                            <!--            <td><a th:href="@{/student/{id}/delete(id=${customer.id})}"><span-->
+                            <!--                    class="glyphicon glyphicon-trash"></span></a></td>-->
+                        </tr>
+                    </th:block>
+
+                    </tbody>
+                </table>
+            </div>
+        </th:block>
+    </div>
+    <footer th:replace="fragments/layout :: footer"></footer>
+</div>
+
+</body>
+</html>

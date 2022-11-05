@@ -24,4 +24,11 @@ public class FullName implements Serializable {
     @Column(name = "last_name")
     private String lName;
 
+    @Override
+    public String toString() {
+        String fName_str = fName.trim().isEmpty() ? "" : fName;
+        String lName_str = lName.trim().isEmpty() ? "" : lName + " ";
+
+        return lName_str + fName_str;
+    }
 }

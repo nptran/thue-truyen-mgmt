@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: common-header">
+</head>
+<body>
+<div class="header-nightsky">
+    <nav th:replace="fragments/layout :: header"></nav>
+    <div class="hero">
+        <h1>Hệ Thống Quản Lý Cửa Hàng</h1>
+        <p>Chào mừng Nhân viên X<br>Vui lòng chọn một chức năng bên dưới</p>
+        <a class="btn btn-primary" th:href="@{/customer}">Tìm Kiếm Khách Hàng</a><br>
+        <a class="btn btn-primary">Khác</a>
+<!--        <ul class="list-group">-->
+<!--            <li class="list-group-item">-->
+<!--            </li>-->
+<!--            <li class="list-group-item">-->
+<!--            </li>-->
+<!--        </ul>-->
+    </div>
+    <footer th:replace="fragments/layout :: footer"></footer>
+</div>
+</body>
+</html>

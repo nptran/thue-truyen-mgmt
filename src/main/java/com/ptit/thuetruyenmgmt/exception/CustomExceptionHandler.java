@@ -2,8 +2,6 @@ package com.ptit.thuetruyenmgmt.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -48,20 +46,12 @@ public class CustomExceptionHandler {
 		return new ErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
 	}
 
-	@ExceptionHandler(InvalidAnswerResultException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ErrorResponse handlerInvalidAnswerResultException(InvalidAnswerResultException ex, WebRequest req) {
-		ex.printStackTrace();
-		return new ErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
-	}
-
-	// Username không tồn tại
-	@ExceptionHandler(UsernameNotFoundException.class)
-	@ResponseStatus(HttpStatus.NOT_FOUND)
-	public ErrorResponse handlerUsernameNotFoundException(UsernameNotFoundException ex, WebRequest req) {
-		ex.printStackTrace();
-		return new ErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
-	}
+//	@ExceptionHandler(InvalidAnswerResultException.class)
+//	@ResponseStatus(HttpStatus.BAD_REQUEST)
+//	public ErrorResponse handlerInvalidAnswerResultException(InvalidAnswerResultException ex, WebRequest req) {
+//		ex.printStackTrace();
+//		return new ErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+//	}
 
 	// Sai mật khẩu
 	@ExceptionHandler(BadCredentialsException.class)
@@ -71,13 +61,13 @@ public class CustomExceptionHandler {
 		return new ErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
 	}
 
-	// Level câu hỏi chưa được chỉ định
-	@ExceptionHandler(HttpMessageNotReadableException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ErrorResponse handlerInvalidLevelException(HttpMessageNotReadableException ex, WebRequest req) {
-		ex.printStackTrace();
-		return new ErrorResponse(HttpStatus.BAD_REQUEST, "Level does not exist, check again please!");
-	}
+//	// Level câu hỏi chưa được chỉ định
+//	@ExceptionHandler(HttpMessageNotReadableException.class)
+//	@ResponseStatus(HttpStatus.BAD_REQUEST)
+//	public ErrorResponse handlerInvalidLevelException(HttpMessageNotReadableException ex, WebRequest req) {
+//		ex.printStackTrace();
+//		return new ErrorResponse(HttpStatus.BAD_REQUEST, "Level does not exist, check again please!");
+//	}
 
 	// Xử lý tất cả các exception chưa được khai báo
 	@ExceptionHandler(Exception.class)

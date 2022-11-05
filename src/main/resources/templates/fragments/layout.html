@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+	<head th:fragment="common-header">
+	    <title>Quản lý Cho Thuê Truyện</title>
+	    <meta charset="utf-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+	    
+	    <link rel="stylesheet" th:href="@{http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css}" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<link rel="stylesheet" th:href="@{/css/footer-distributed-with-contact-form.css}" href="../../css/footer-distributed-with-contact-form.css">
+	    <link rel="stylesheet" th:href="@{/css/header.css}" href="../../css/header.css">
+	    <link rel="stylesheet" th:href="@{/css/style.css}" href="../../css/style.css">
+
+	    <link rel="stylesheet" th:href="@{https://fonts.googleapis.com/css?family=Montserrat}" href="https://fonts.googleapis.com/css?family=Montserrat">
+		
+		<!-- Font Awesome -->
+		<link rel="stylesheet" th:href="@{https://use.fontawesome.com/releases/v5.4.2/css/all.css}" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css">
+
+		<!-- jQuery -->
+		<script th:src="@{http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js}" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    	<script th:src="@{http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js}" src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script th:src="@{/js/custom.js}" src="../../js/custom.js"></script>
+	</head>
+	
+	<body>
+	    <div class="header-nightsky">
+	        <nav class="navbar navbar-default"  th:fragment="header">
+	            <div class="container">
+	                <a class="navbar-brand" th:href="@{/home}" style="margin:0 30px; padding:0;"><i class="fas fa-apple-alt" style="margin-right:10px"></i>Táo</a>
+	                <div class="navbar-header">
+	                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+	                        <span class="icon-bar"></span>
+	                        <span class="icon-bar"></span>
+	                        <span class="icon-bar"></span>
+	                    </button>
+	                </div>
+	                <div class="collapse navbar-collapse" id="myNavbar">
+	                    <ul class="nav navbar-nav navbar-right">
+	                        <li><a th:href="@{/home}">HOME</a></li>
+	                       	<li><a href="">NEWS</a></li>
+	                        <li><a th:href="@{/student}">TOOL</a></li>
+	                        <li class="dropdown">
+	                            <a class="dropdown-toggle" data-toggle="dropdown" th:href="@{#}">ABOUT<span class="caret"></span></a>
+	                            <ul class="dropdown-menu">
+	                                <li><a th:href="@{https://github.com/nptran}" target="_blank">Github</a></li>
+	                                <li><a href="#">Facebook</a></li>
+	                                <li><a href="#">Twitter</a></li>
+	                            </ul>
+	                        </li>
+	                    </ul>
+	                </div>
+	            </div>
+	        </nav>
+	    </div>
+	    
+		<footer>
+			<div th:fragment="footer" style="text-align: center">
+				<p>&copy; Powered By Spring Boot</p>
+			</div>
+		</footer>
+	</body>
+	
+	
+</html>

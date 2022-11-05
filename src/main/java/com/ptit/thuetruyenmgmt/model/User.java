@@ -15,6 +15,8 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "user")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="user_type",
+        discriminatorType = DiscriminatorType.INTEGER)
 public class User implements Serializable {
 
     @Id
@@ -36,5 +38,9 @@ public class User implements Serializable {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "name_id")
     private FullName fullName;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "address_id")
+    private Address address;
 
 }

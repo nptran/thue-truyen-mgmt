@@ -42,7 +42,7 @@ public class RentedBook implements Serializable {
      * Map sang {@link java.util.List} {@link Bill#rentedBooks} trong {@link Bill}
      */
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH})
-    @JoinColumn(name = "bill_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "bill_id", referencedColumnName = "id")
     private Bill bill;
 
     /**
@@ -50,5 +50,8 @@ public class RentedBook implements Serializable {
      */
     @OneToMany(mappedBy = "penalty", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<RentedBookPenalty> penalties;
+
+    @Column
+    private boolean isPaid;
 
 }

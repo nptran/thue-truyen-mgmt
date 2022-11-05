@@ -22,7 +22,7 @@ public class RentedBookServiceImpl implements RentedBookService {
 
     @Override
     public List<RentedBook> getRentedBooksByCustomer(int customerId) {
-        return null;
+        return repository.findAllByCustomer_IdAndIsPaidIsFalse(customerId);
     }
 
     @Override
