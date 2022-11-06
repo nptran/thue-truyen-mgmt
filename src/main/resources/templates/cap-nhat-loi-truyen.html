@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: common-header"></head>
+<body>
+<div class="header-nightsky">
+    <nav th:replace="fragments/layout :: header"></nav>
+
+    <div class="hero form" style="margin:auto;">
+        <div class="row">
+            <h3>Cập Nhật Lỗi Truyện cho Đầu Truyện </h3>
+            <p th:text="'Tên Đầu Truyện: ' + ${rentedBook.titleName}"></p>
+            <p th:text="'Mã Đầu Truyện: ' + ${rentedBook.code}"></p>
+
+            <form action="#" th:action="@{/rented-book/save}" th:object="${rentedBook}"
+                  method="POST" novalidate="novalidate">
+                <input type="hidden" th:field="*{rentedBookId}"/>
+                <div class="row">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                        <tr>
+                            <th>Chọn Lỗi Truyện</th>
+                            <th>Nhập Phí Phạt</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="penalty, stat : ${allPenalties}">
+                            <td>
+                                <div class="form-group">
+                                    <label>Chọn Lỗi Truyện</label>
+                                    <input type="checkbox" class="form-control"
+                                           th:field="*{penalties[__${stat.index}__].id}"
+                                           th:value="${penalty.id}"
+                                           th:text="${penalty.name+': '+penalty.description}"
+                                    />
+                                    <!--                    <span class="label label-danger" th:if="${#fields.hasErrors('penalties')}" th:errors="*{penalties}">Có Lỗi Khi Chọn Lỗi Truyện</span>-->
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    <label>Nhập Phí Phạt</label>
+                                    <input type="number" class="form-control"
+                                           th:field="*{penalties[__${stat.index}__].recommendedFee}"
+                                           th:value="${penalty.recommendedFee}"
+                                           th:text="${'Mức phạt Đề xuất: '+penalty.recommendedFee}"/>
+                                    <!--                    <span class="label label-danger" th:if="${#fields.hasErrors('penalties')}" th:errors="*{penalties}">Có Lỗi Khi Nhập Phí Phạt</span>-->
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-right:0px">Lưu</button>
+            </form>
+        </div><!-- /.container -->
+    </div><!-- /.hero -->
+</div><!-- /.header-nightsky -->
+
+</body>
+</html>

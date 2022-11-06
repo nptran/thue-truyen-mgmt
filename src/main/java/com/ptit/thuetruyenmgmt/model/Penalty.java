@@ -3,11 +3,11 @@ package com.ptit.thuetruyenmgmt.model;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import java.io.Serializable;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,7 +17,7 @@ public class Penalty implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column
     private String name;
@@ -26,7 +26,8 @@ public class Penalty implements Serializable {
     private String description;
 
     @Column
-    private double recommended_fee;
+    @Min(value = 0, message = "Mức Phí Phạt Tối Thiểu Là 500 Đồng")
+    private double recommendedFee;
 
     /**
      * Map sang question trong {@link RentedBookPenalty#penalty}

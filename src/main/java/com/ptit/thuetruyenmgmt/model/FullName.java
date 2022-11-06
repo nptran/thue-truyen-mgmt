@@ -16,7 +16,7 @@ public class FullName implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(name = "first_name")
     private String fName;

@@ -26,7 +26,7 @@ public class Staff extends User {
     private List<Bill> bills;
 
     @Builder(builderMethodName = "staffBuilder")
-    public Staff(int id, String loginCode, LocalDate dob, String email, String phone, FullName fullName, Address address, StaffPosition position) {
+    public Staff(Integer id, String loginCode, LocalDate dob, String email, String phone, FullName fullName, Address address, StaffPosition position) {
         super(id, loginCode, dob, email, phone, fullName, address);
         this.position = position;
     }

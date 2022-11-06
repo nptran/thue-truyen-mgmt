@@ -6,16 +6,9 @@
     <nav th:replace="fragments/layout :: header"></nav>
     <div class="hero list" style="margin: 0px auto 20px auto;">
         <h1 style="color: #313131;">Tìm Kiếm Khách Hàng</h1>
-        <div th:if="${success}" class="row alert alert-success alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert"
-                    aria-label="Close">
-                <span aria-hidden="true">×</span>
-            </button>
-            <span th:text="${success}"></span>
-        </div>
         <div class="row">
             <a th:href="@{/home}" class="btn btn-warning pull-left">
-                <span class="fas fa-plus-circle"></span> Quay Lại
+                <span class="fas fa-backward"></span> Quay Lại
             </a>
             <form class="form-inline pull-right" action="#"
                   th:action="@{/customer/search}" method="GET">

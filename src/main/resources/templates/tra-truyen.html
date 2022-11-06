@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: common-header"></head>
+<body>
+<div class="header-nightsky">
+    <nav th:replace="fragments/layout :: header"></nav>
+    <div class="hero list" style="margin: 0px auto 20px auto;">
+        <h1 style="color: #313131;">Trả Truyện</h1>
+
+        <form action="#"
+              th:object="${returnBookDtos}"
+              th:action="@{/customer/show-bill}" method="GET">
+            <input class="form-control" type="hidden" name="customerId" th:value="*{customerId}"/>
+            <div class="row">
+                <a th:href="@{/customer/rented-books={id}(id=*{customerId})}" class="btn btn-warning pull-left">
+                    <span class="fas fa-backward"></span> Quay Lại
+                </a>
+                <button type="submit" class="btn btn-success">Thanh Toán</button>
+            </div>
+
+            <!-- BẢNG DS ĐẦU TRUYỆN ĐANG MƯỢN -->
+            <!-- NẾU KẾT QUẢ TRỐNG -->
+            <th:block th:if="${#lists.isEmpty(returnBookDtos.rentedBookDtos)}">
+                <h3>Danh sách trống! Khách hàng đang không mượn truyện nào!</h3>
+            </th:block>
+            <th:block th:if="${#lists.isEmpty(allPenalties)}">
+                <h3>Danh sách Lỗi truyện trống! Thêm ngay!</h3>
+            </th:block>
+
+            <!-- NẾU CÓ KẾT QUẢ -->
+            <th:block th:unless="${#lists.isEmpty(returnBookDtos.rentedBookDtos)}">
+                <div class="row">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã</th>
+                            <th>Tên Đầu Truyện</th>
+                            <th>Ngày Mượn</th>
+                            <th>Giá Thuê</th>
+                            <th>Lỗi Truyện Hiện Tại</th>
+                            <th>Cập Nhật Lỗi Truyện</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="book,iterStat : ${returnBookDtos.rentedBookDtos}" class="form-group">
+                            <td th:text="${iterStat.count}"></td>
+                            <td th:text="${book.code}"></td>
+                            <td th:text="${book.titleName}"></td>
+                            <td th:text="${book.rentedTime.toString()}"></td>
+                            <td th:text="${book.amount+'đ'}"></td>
+                            <td>
+                                <ul class="list-group">
+                                    <li class="list-group-item" th:each="p, stat : ${book.penalties}"
+                                        th:text="${p.name + ': ' + p.recommendedFee+'đ'}">
+                                    </li>
+                                </ul>
+                            </td>
+                            <td>
+                                <a th:href="@{/rented-book/{id}/penalties(id=${book.rentedBookId})}"
+                                   class="btn btn-success">
+                                    <span class="fas fa-plus"></span> Cập Nhật
+                                </a>
+                                <!--                                <input th:each="penalty,iterStat : ${book.penalties}" class="form-control"-->
+                                <!--                                       type="checkbox"-->
+                                <!--                                       name="penalties"-->
+                                <!--                                       th:text="${penalty.name}"-->
+                                <!--                                       th:value="${penalty.id}"/>-->
+                            </td>
+                            <!--                            <td th:text="${penaltyOfBook.recommendedFee}"></td>-->
+                            <!--                                <th:block>-->
+                            <!--                                    <td rowspan="1" class="form-group">-->
+                            <!--                                        <input class="form-control" type="hidden" name="bookId"-->
+                            <!--                                               th:value="${book.rentedBookId}"/>-->
+                            <!--                                        <div th:each="penalty,iterStat : ${allPenalties}">-->
+                            <!--                                            <label th:for="${'selectPenalty-'+book.rentedBookId}"-->
+                            <!--                                                   th:text="${penalty.name}"></label>-->
+                            <!--                                            <input class="form-control" type="checkbox"-->
+                            <!--                                                   th:id="${'selectPenalty-'+book.rentedBookId}"-->
+                            <!--                                                   th:field="${book.penaltyId}"-->
+                            <!--                                                   th:value="${penalty.id}"/>-->
+                            <!--                                            <label th:for="${'Fee-'+book.rentedBookId}"-->
+                            <!--                                                   th:text="${penalty.name}"></label>-->
+                            <!--                                            <input class="form-control" type="number"-->
+                            <!--                                                   th:placeholder="${'Mức phạt Đề xuất: '+penalty.recommendedFee}"-->
+                            <!--                                                   th:id="${'Fee-'+book.rentedBookId}"-->
+                            <!--                                                   th:field="${book.fee}"-->
+                            <!--                                                   th:value="${penalty.recommendedFee}"/>-->
+                            <!--                                        </div>-->
+                            <!--                                    </td>-->
+                            <!--                                </th:block>-->
+                            <!--            <td><a th:href="@{/student/{id}/delete(id=${customer.id})}"><span-->
+                            <!--                    class="glyphicon glyphicon-trash"></span></a></td>-->
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </th:block>
+        </form>
+    </div>
+    <footer th:replace="fragments/layout :: footer"></footer>
+</div>
+
+</body>
+</html>
