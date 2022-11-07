@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,12 @@ public class RentedBookController {
     private PenaltyService penaltyService;
 
 
+    /**
+     * Tới giao diện hiển thị tất cả các RentedBook hiện tại của Khách trên `ds-truyen-kh`.
+     *
+     * @param id
+     * @return
+     */
     @GetMapping("/customer/rented-books={id}")
     public ModelAndView getRentedBooks(@PathVariable Integer id) {
         ModelAndView mav = new ModelAndView("ds-truyen-kh");
@@ -46,9 +53,18 @@ public class RentedBookController {
         return mav;
     }
 
-    @PostMapping("/customer/check-return")
-    public ModelAndView checkSelectedReturnBooks(@RequestParam("customerId") int customerId,
-                                                 ReadyToReturnBooks selectedBooks,
+    /**
+     * Kiểm tra các truyện được chọn trong giao diện `ds-truyen-kh` và
+     * chuyển sang giao diện `tra-truyen` nếu có ít nhất một Đầu truyện được chọn trả
+     *
+     * @param customerId
+     * @param selectedBooks DS truyện muốn trả đã chọn, được gửi từ form trong Giao diện `ds-truyen-kh`
+     * @param redirect
+     * @return
+     */
+    @PostMapping("/rented-book/selectToReturn-of={id}")
+    public ModelAndView checkSelectedReturnBooks(@PathVariable("id") Integer customerId,
+                                                 @ModelAttribute ReadyToReturnBooks selectedBooks,
                                                  RedirectAttributes redirect) {
         List<RentedBook> books = selectedBooks.getWillBeReturnedBooks();
         if (books.isEmpty()) {
@@ -56,7 +72,7 @@ public class RentedBookController {
             return new ModelAndView("redirect:/customer/rented-books=" + customerId);
         }
 
-        List<RentedBookDTO> req = new ArrayList<>();
+        List<RentedBookDTO> rentedBookDtos = new ArrayList<>();
         for (RentedBook book : books) {
             RentedBook originalBook = service.getRentedBookById(book.getId());
             List<Penalty> currentPenalties = service.rentedBookPenaltiesToPenalties(originalBook.getPenalties());
@@ -69,12 +85,26 @@ public class RentedBookController {
                     .amount(originalBook.getAmount())
                     .penalties(currentPenalties)
                     .build();
-            req.add(pobDto);
+            rentedBookDtos.add(pobDto);
         }
 
-        return proceedReturnBooks(customerId, new ReturnRentedBookRequest(customerId, req), redirect);
+        ModelAndView mav = new ModelAndView("tra-truyen");
+
+        mav.addObject("returnBookDtos", new ReturnRentedBookRequest(customerId, rentedBookDtos));
+        mav.addObject("allPenalties", penaltyService.getAllPenalties());
+
+        return mav;
     }
 
+
+    /**
+     * Hiển thị Giao diện để cập nhật Lỗi truyện cho Đầu truyện.
+     * Tạo các đối tượng cần để khởi tạo cho Form
+     *
+     * @param bookId
+     * @param redirect
+     * @return
+     */
     @RequestMapping("/rented-book/{id}/penalties")
     public ModelAndView updatePenaltyOfRentedBook(@PathVariable(name = "id") int bookId, RedirectAttributes redirect) {
         ModelAndView mav = new ModelAndView("cap-nhat-loi-truyen");
@@ -114,25 +144,48 @@ public class RentedBookController {
         return mav;
     }
 
-    @PostMapping("rented-book/save")
-    public ModelAndView saveRentedBook(@Valid RentedBookDTO rentedBook, BindingResult result, RedirectAttributes redirect) {
-        ModelAndView mav = new ModelAndView("redirect:/rented-book/" + rentedBook.getRentedBookId() + "/penalties");
+    /**
+     * Xử lý lấy dữ liệu từ form và cập nhật DS Lỗi truyện cho Đầu truyện.
+     *
+     * @param rentedBook
+     * @param result
+     * @param redirect
+     * @return
+     */
+    @PostMapping("/rented-book/{id}/save-penalties")
+    public ModelAndView saveRentedBook(@Valid RentedBookDTO rentedBook,
+                                       BindingResult result,
+                                       RedirectAttributes redirect,
+                                       HttpServletRequest request,
+                                       @PathVariable(name = "id") int rentedBookId) {
 
         LOGGER.debug(rentedBook.toString());
         if (result.hasErrors()) {
-            return new ModelAndView("redirect:/rented-book/" + rentedBook.getRentedBookId() + "/penalties");
+            return new ModelAndView("redirect:/rented-book/" + rentedBookId + "/penalties");
         }
-        RentedBook originalRentedBook = service.getRentedBookById(rentedBook.getRentedBookId());
-        List<RentedBookPenalty> penalties = new ArrayList<>();
+        RentedBook originalRentedBook = service.getRentedBookById(rentedBookId);
+        List<RentedBookPenalty> currPenalties = originalRentedBook.getPenalties();
+
         List<Penalty> selectedPenalties = rentedBook.getPenalties();
         selectedPenalties.removeIf(penalty -> penalty.getId() == null); // Remove NULL penalties (no selected)
+        List<Integer> newPenIds = selectedPenalties.stream().map(Penalty::getId).collect(Collectors.toList());
 
+        List<RentedBookPenaltyKey> removedIds = new ArrayList<>();
+        for (RentedBookPenalty p: currPenalties) {
+            int id = p.getId().getPenaltyId();
+            if (!newPenIds.contains(id)) {
+                removedIds.add(p.getId());
+            }
+        }
+
+
+        List<RentedBookPenalty> penalties = new ArrayList<>();
         for (Penalty penalty : selectedPenalties) {
             Penalty originalPenalty = penaltyService.getPenaltyById(penalty.getId());
             double fee = penalty.getRecommendedFee();
             RentedBookPenalty rentedBookPenalty =
                     RentedBookPenalty.builder()
-                            .key(new RentedBookPenaltyKey(originalRentedBook.getId(), originalPenalty.getId()))
+                            .id(new RentedBookPenaltyKey(originalRentedBook.getId(), originalPenalty.getId()))
                             .rentedBook(originalRentedBook)
                             .penalty(originalPenalty)
                             .fee(fee)
@@ -140,41 +193,13 @@ public class RentedBookController {
             penalties.add(rentedBookPenalty);
         }
 
-        service.addPenaltiesIntoRentedBook(penalties, originalRentedBook.getId());
+//        service.deleteCurrentPenaltiesOfRentedBook(originalRentedBook.getId());
 
-        return mav;
-    }
+        service.addPenaltiesIntoRentedBook(penalties, removedIds, originalRentedBook.getId());
 
-    @GetMapping("/customer/returningOfCustomer={id}")
-    public ModelAndView proceedReturnBooks(@PathVariable(name = "id") Integer customerId,
-                                           @ModelAttribute ReturnRentedBookRequest returnRentedBookReq,
-                                           RedirectAttributes redirect) {
-        ModelAndView mav = new ModelAndView("tra-truyen");
-        List<RentedBookDTO> rentedBookDtos = returnRentedBookReq.getRentedBookDtos();
-        for (RentedBookDTO dto : rentedBookDtos) {
-            for (Penalty p : dto.getPenalties()) {
-                LOGGER.info("PENALTY: " + p);
-            }
-        }
+        String referer = request.getHeader("Referer");
 
-//        List<Penalty> allPenalties = penaltyService.getAllPenalties();
-//        for (RentedBook book : books) {
-//            List<RentedBookPenaltyRequest> pobRequests = new ArrayList<>();
-//            for (Penalty penalty : allPenalties) {
-//                RentedBookPenaltyRequest possiblePenalty =
-//                        RentedBookPenaltyRequest.builder()
-//                                .bookId(book.getId())
-//                                .penaltyId(penalty.getId())
-//                                .fee(penalty.getRecommendedFee())
-//                                .build();
-//                pobRequests.add(possiblePenalty);
-//            }
-//            book.setPenalties(pobRequests);
-//        }
-
-//        mav.addObject("availablePenalties", penaltiesOfBook);
-        mav.addObject("returnBookDtos", returnRentedBookReq);
-        mav.addObject("allPenalties", penaltyService.getAllPenalties());
+        ModelAndView mav = new ModelAndView("redirect:" + referer);
 
         return mav;
     }

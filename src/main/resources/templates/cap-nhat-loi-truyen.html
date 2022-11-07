@@ -11,7 +11,7 @@
             <p th:text="'Tên Đầu Truyện: ' + ${rentedBook.titleName}"></p>
             <p th:text="'Mã Đầu Truyện: ' + ${rentedBook.code}"></p>
 
-            <form action="#" th:action="@{/rented-book/save}" th:object="${rentedBook}"
+            <form action="#" th:action="@{/rented-book/{id}/save-penalties(id=*{rentedBookId})}" th:object="${rentedBook}"
                   method="POST" novalidate="novalidate">
                 <input type="hidden" th:field="*{rentedBookId}"/>
                 <div class="row">

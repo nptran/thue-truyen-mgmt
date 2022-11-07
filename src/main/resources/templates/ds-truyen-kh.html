@@ -15,7 +15,7 @@
         </div>
         <form action="#"
               th:object="${selectedBooks}"
-              th:action="@{/customer/check-return}" method="POST">
+              th:action="@{/rented-book/selectToReturn-of={id}(id=*{customerId})}" method="POST">
             <input class="form-control" type="hidden" name="customerId" th:value="*{customerId}"/>
             <div class="row">
                 <a th:href="@{/customer}" class="btn btn-warning pull-left">

@@ -18,7 +18,7 @@ public class RentedBookPenalty implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @EmbeddedId
-	private RentedBookPenaltyKey key;
+    private RentedBookPenaltyKey id;
 
     /**
      * Map sang {@link java.util.List} {@link RentedBook#penalties} trong {@link RentedBook}
@@ -41,12 +41,12 @@ public class RentedBookPenalty implements Serializable {
     @Override
     public boolean equals(Object obj) {
         return (obj instanceof RentedBookPenalty)
-                && ((RentedBookPenalty) obj).getRentedBook().equals(this.rentedBook.getId())
-                && ((RentedBookPenalty) obj).getPenalty().getId().equals(this.penalty.getId());
+                && ((RentedBookPenalty) obj).getId().getRentedBookId().equals(this.id.getRentedBookId())
+                && ((RentedBookPenalty) obj).getId().getPenaltyId().equals(this.id.getPenaltyId());
     }
 
     @Override
     public int hashCode() {
-        return this.rentedBook.getId().hashCode() + this.penalty.getId().hashCode();
+        return this.id.getRentedBookId().hashCode() + this.id.getPenaltyId().hashCode();
     }
 }
