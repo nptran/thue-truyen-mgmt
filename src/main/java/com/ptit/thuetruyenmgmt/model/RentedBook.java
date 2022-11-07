@@ -15,6 +15,8 @@ import java.util.List;
 @Table(name = "rented_book")
 public class RentedBook implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -47,7 +49,7 @@ public class RentedBook implements Serializable {
     /**
      * Map sang rentedBook trong {@link RentedBookPenalty#rentedBook}
      */
-    @OneToMany(mappedBy = "penalty", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "rentedBook", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<RentedBookPenalty> penalties;
 
     @Column

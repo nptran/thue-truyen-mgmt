@@ -3,6 +3,7 @@ package com.ptit.thuetruyenmgmt.controller;
 import com.ptit.thuetruyenmgmt.model.Penalty;
 import com.ptit.thuetruyenmgmt.model.RentedBook;
 import com.ptit.thuetruyenmgmt.model.RentedBookPenalty;
+import com.ptit.thuetruyenmgmt.model.key.RentedBookPenaltyKey;
 import com.ptit.thuetruyenmgmt.model.request.RentedBookDTO;
 import com.ptit.thuetruyenmgmt.model.request.ReturnRentedBookRequest;
 import com.ptit.thuetruyenmgmt.model.request.ReadyToReturnBooks;
@@ -19,7 +20,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -59,14 +59,15 @@ public class RentedBookController {
         List<RentedBookDTO> req = new ArrayList<>();
         for (RentedBook book : books) {
             RentedBook originalBook = service.getRentedBookById(book.getId());
-            List<Penalty> penalties = service.rentedBookPenaltiesToPenalties(originalBook.getPenalties());
+            List<Penalty> currentPenalties = service.rentedBookPenaltiesToPenalties(originalBook.getPenalties());
+
             RentedBookDTO pobDto = RentedBookDTO.builder()
                     .rentedBookId(originalBook.getId())
                     .code(originalBook.getBookTitle().getCode())
                     .titleName(originalBook.getBookTitle().getTitleName())
                     .rentedTime(originalBook.getRentedTime())
                     .amount(originalBook.getAmount())
-                    .penalties(penalties)
+                    .penalties(currentPenalties)
                     .build();
             req.add(pobDto);
         }
@@ -81,14 +82,23 @@ public class RentedBookController {
         List<Penalty> currentPenalties = service.rentedBookPenaltiesToPenalties(book.getPenalties());
         List<Integer> currentPenaltiesIds = currentPenalties.stream().map(Penalty::getId).collect(Collectors.toList());
         List<Penalty> allAvailablePenalties = penaltyService.getAllPenalties();
-        List<Penalty> tmpPenalties = new ArrayList<>(allAvailablePenalties);
-
-        // Đặt lại ds penalty để tránh bị lệch index khi hiển thị trên view
-        for (Penalty p : tmpPenalties) {
-            if (!currentPenaltiesIds.contains(p.getId())) {
-                p.setId(null);
+        List<Penalty> tmpPenalties = new ArrayList<>();
+        for (Penalty originalPenalty : allAvailablePenalties) {
+            Integer id = null;
+            if (currentPenaltiesIds.contains(originalPenalty.getId())) {
+                id = originalPenalty.getId();
             }
+            Penalty p = Penalty.builder()
+                    .id(id)
+                    .name(originalPenalty.getName())
+                    .description(originalPenalty.getDescription())
+                    .recommendedFee(originalPenalty.getRecommendedFee())
+                    .build();
+            tmpPenalties.add(p);
         }
+
+        // Đặt lại ds penalty để chỉ tick những ô penalty hiện tại của book
+        // Chỉ khi đã có penalty
 
         RentedBookDTO rentedBookDTO =
                 RentedBookDTO.builder()
@@ -105,15 +115,16 @@ public class RentedBookController {
     }
 
     @PostMapping("rented-book/save")
-    public ModelAndView saveRentedBook(@Valid RentedBookDTO rentedBookDto, BindingResult result, RedirectAttributes redirect) {
-        ModelAndView mav = new ModelAndView("home");
-        LOGGER.debug(rentedBookDto.toString());
+    public ModelAndView saveRentedBook(@Valid RentedBookDTO rentedBook, BindingResult result, RedirectAttributes redirect) {
+        ModelAndView mav = new ModelAndView("redirect:/rented-book/" + rentedBook.getRentedBookId() + "/penalties");
+
+        LOGGER.debug(rentedBook.toString());
         if (result.hasErrors()) {
-            return new ModelAndView("redirect:/rented-book/" + rentedBookDto.getRentedBookId() + "/penalties");
+            return new ModelAndView("redirect:/rented-book/" + rentedBook.getRentedBookId() + "/penalties");
         }
-        RentedBook rentedBook = service.getRentedBookById(rentedBookDto.getRentedBookId());
+        RentedBook originalRentedBook = service.getRentedBookById(rentedBook.getRentedBookId());
         List<RentedBookPenalty> penalties = new ArrayList<>();
-        List<Penalty> selectedPenalties = rentedBookDto.getPenalties();
+        List<Penalty> selectedPenalties = rentedBook.getPenalties();
         selectedPenalties.removeIf(penalty -> penalty.getId() == null); // Remove NULL penalties (no selected)
 
         for (Penalty penalty : selectedPenalties) {
@@ -121,14 +132,15 @@ public class RentedBookController {
             double fee = penalty.getRecommendedFee();
             RentedBookPenalty rentedBookPenalty =
                     RentedBookPenalty.builder()
-                            .rentedBook(rentedBook)
+                            .key(new RentedBookPenaltyKey(originalRentedBook.getId(), originalPenalty.getId()))
+                            .rentedBook(originalRentedBook)
                             .penalty(originalPenalty)
                             .fee(fee)
                             .build();
             penalties.add(rentedBookPenalty);
         }
 
-        service.addPenaltiesIntoRentedBook(penalties, rentedBook.getId());
+        service.addPenaltiesIntoRentedBook(penalties, originalRentedBook.getId());
 
         return mav;
     }

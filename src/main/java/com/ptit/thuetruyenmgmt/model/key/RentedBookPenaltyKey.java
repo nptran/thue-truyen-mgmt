@@ -20,6 +20,6 @@ public class RentedBookPenaltyKey implements Serializable {
 	private Integer rentedBookId;
 
 	@Column(name = "penalty_id")
-	private Integer penalyId;
+	private Integer penaltyId;
 
 }

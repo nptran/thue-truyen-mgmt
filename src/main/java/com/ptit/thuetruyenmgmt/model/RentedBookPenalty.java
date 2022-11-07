@@ -15,21 +15,23 @@ import java.io.Serializable;
 @Table(name = "rented_book_penalty")
 public class RentedBookPenalty implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     @EmbeddedId
 	private RentedBookPenaltyKey key;
 
     /**
      * Map sang {@link java.util.List} {@link RentedBook#penalties} trong {@link RentedBook}
      */
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH})
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("rentedBookId")
     private RentedBook rentedBook;
 
     /**
      * Map sang {@link java.util.List} {@link Penalty#detectedPenalties} trong {@link Penalty}
      */
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH})
-    @MapsId("penalyId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("penaltyId")
     private Penalty penalty;
 
     @Column
