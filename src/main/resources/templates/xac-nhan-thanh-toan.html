@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: common-header"></head>
+<body>
+<div class="header-nightsky">
+    <nav th:replace="fragments/layout :: header"></nav>
+    <div class="hero list" style="margin: 0px auto 20px auto;">
+        <div class="jumbotron">
+            <h1 style="color: #313131;font-size: 30px;">Thông Tin Thanh Toán</h1>
+            <p style="color: cadetblue;font-size: initial;"
+               th:text="${'Mã khách hàng: '+customerInfo.id}"></p><br>
+            <p style="color: cadetblue;font-size: initial;"
+               th:text="${'Tên khách hàng: '+customerInfo.fullName+' - SĐT: '+customerInfo.phone}"></p><br>
+            <p style="color: cadetblue;font-size: initial;"
+               th:text="${'Địa chỉ: '+customerInfo.address}"></p><br>
+            <p style="color: cadetblue;font-size: initial;"
+               th:text="${'Thời điểm thanh toán: '+bill.createTime}"></p><br>
+        </div>
+
+        <th:block th:if="${paySuccess}">
+            <script type="text/javascript">
+                window.onload = function () {
+                    if (confirm("Thanh toán thành công! Quay về trang chủ!")) {
+                        window.location = "http://localhost:9000/";
+                    }
+                };
+            </script>
+            <h3>Thanh toán thành công, Quay lại trang chủ</h3>
+        </th:block>
+
+        <div>
+            <p>
+
+            </p>
+        </div>
+        <form action="#"
+              th:object="${bill}"
+              th:action="@{/customer/create-bill}" method="POST">
+            <div class="row">
+                <a th:href="@{/customer/rented-books={id}(id=${customerId})}" class="btn btn-warning pull-left">
+                    <span class="fas fa-backward"></span> Huỷ Thanh Toán
+                </a>
+                <button type="submit" name="action" value="checkingPay" class="btn btn-success">Xác Nhận</button>
+            </div>
+
+            <!-- BẢNG DS ĐẦU TRUYỆN ĐANG MƯỢN -->
+            <!-- NẾU KẾT QUẢ TRỐNG -->
+            <th:block th:if="${#lists.isEmpty(bill.rentedBooks)}">
+                <script type="text/javascript">
+                    window.onload = function () {
+                        if (confirm("Không tìm thấy Đầu truyện nào để thanh toán. Vui lòng thực hiện lại!")) {
+                            window.location = "http://localhost:9000/";
+                        }
+                    };
+                </script>
+                <h3>Có lỗi! Không tìm thấy Đầu truyện nào để thanh toán!</h3>
+            </th:block>
+
+            <!-- NẾU CÓ KẾT QUẢ -->
+            <th:block th:unless="${#lists.isEmpty(bill.rentedBooks)}">
+                <div class="row">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã</th>
+                            <th>Tên Đầu Truyện</th>
+                            <th>Ngày Mượn</th>
+                            <th>Giá Thuê</th>
+                            <th>Lỗi Truyện Hiện Tại</th>
+                            <th>Tiền Phạt</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="book,iterStat : ${bill.rentedBooks}" class="form-group">
+                            <td th:text="${iterStat.count}"></td>
+                            <td th:text="${book.bookTitle.code}"></td>
+                            <td th:text="${book.bookTitle.titleName}"></td>
+                            <td th:text="${book.rentedTime}"></td>
+                            <td th:text="${book.amount+'đ'}"></td>
+                            <td>
+                                <ul class="list-group">
+                                    <li class="list-group-item" th:each="p, stat : ${book.penalties}"
+                                        th:text="${p.penalty.name}">
+                                    </li>
+                                </ul>
+                            </td>
+                            <td>
+                                <ul class="list-group">
+                                    <li class="list-group-item" th:each="p, stat : ${book.penalties}"
+                                        th:text="${p.fee + 'đ'}">
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <th>Tổng tiền</th>
+                            <th colspan="3" th:text="${bill.totalAmount+'đ'}"></th>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </th:block>
+        </form>
+    </div>
+    <footer th:replace="fragments/layout :: footer"></footer>
+</div>
+
+</body>
+</html>

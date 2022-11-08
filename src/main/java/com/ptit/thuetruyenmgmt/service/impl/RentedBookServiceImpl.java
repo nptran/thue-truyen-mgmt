@@ -1,5 +1,6 @@
 package com.ptit.thuetruyenmgmt.service.impl;
 
+import com.ptit.thuetruyenmgmt.exception.FailedToPayException;
 import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.Customer;
 import com.ptit.thuetruyenmgmt.model.Penalty;
@@ -83,8 +84,26 @@ public class RentedBookServiceImpl implements RentedBookService {
     }
 
     @Override
+    @Transactional
     public boolean updateRentStatus(List<Integer> payBookIds) {
-        return false;
+        List<RentedBook> paidBooks = new ArrayList<>();
+        for (int id : payBookIds) {
+            Optional<RentedBook> optional = repository.findById(id);
+            if (optional.isPresent()) {
+                RentedBook paidBook = optional.get();
+                paidBook.setPaid(true);
+                paidBooks.add(paidBook);
+            } else {
+                throw new FailedToPayException("Đầu truyện ID `" + id + "` không tồn tại.");
+            }
+        }
+
+        try {
+            repository.saveAllAndFlush(paidBooks);
+        } catch (Exception e) {
+            throw new FailedToPayException(e.getMessage());
+        }
+        return true;
     }
 
     @Override

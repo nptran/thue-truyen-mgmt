@@ -38,7 +38,7 @@ public class RentedBookController {
 
 
     /**
-     * Gọi giao diện `ds-truyen-kh` để hiển thị tất cả các RentedBook hiện tại của một Khách hàng
+     * Tải trang `ds-truyen-kh` để hiển thị tất cả các RentedBook hiện tại của một Khách hàng
      *
      * @param id id khách hàng
      * @return
@@ -81,16 +81,10 @@ public class RentedBookController {
         List<Integer> selectedBookIds = books.stream().map(RentedBook::getId).collect(Collectors.toList());
 
         // Lưu lại trong session để xử lý ở các page sau
-        if (session.getAttribute("selectedBookIds") == null) {
-            session.setAttribute("selectedBookIds", selectedBookIds);
-        }
+        session.setAttribute("selectedBookIds", selectedBookIds);
 
         // Chuyển hướng sang dựng giao diện tra-truyen
         ModelAndView mav = new ModelAndView("redirect:/rented-book/selected-of=" + customerId);
-
-//        List<RentedBookDTO> rentedBookDtos = rentedBooksToRentedBookDTOs(books);
-//        mav.addObject("returnBookDtos", new ReturnRentedBookRequest(customerId, rentedBookDtos));
-//        mav.addObject("allPenalties", penaltyService.getAllPenalties());
 
         return mav;
     }
@@ -117,7 +111,7 @@ public class RentedBookController {
         ModelAndView mav = new ModelAndView("tra-truyen");
 
         List<RentedBookDTO> selectedBookDtos = rentedBooksToRentedBookDTOs(selectedBooks);
-        mav.addObject("returnBookDtos", new ReturnRentedBookRequest(customerId, selectedBookDtos));
+        mav.addObject("returnBookReq", new ReturnRentedBookRequest(customerId, selectedBookDtos));
         mav.addObject("allPenalties", penaltyService.getAllPenalties());
 
         return mav;

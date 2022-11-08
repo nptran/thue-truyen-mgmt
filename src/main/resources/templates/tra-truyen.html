@@ -16,19 +16,19 @@
         </div>
 
         <form action="#"
-              th:object="${returnBookDtos}"
-              th:action="@{/customer/show-bill}" method="POST">
+              th:object="${returnBookReq}"
+              th:action="@{/customer/check-bill}" method="POST">
             <input class="form-control" type="hidden" name="customerId" th:value="*{customerId}"/>
             <div class="row">
                 <a th:href="@{/customer/rented-books={id}(id=*{customerId})}" class="btn btn-warning pull-left">
                     <span class="fas fa-backward"></span> Quay Lại
                 </a>
-                <button type="submit" name="action" value="checkingPay" class="btn btn-success">Thanh Toán</button>
+                <button type="submit" class="btn btn-success">Thanh Toán</button>
             </div>
 
             <!-- BẢNG DS ĐẦU TRUYỆN ĐANG MƯỢN -->
             <!-- NẾU KẾT QUẢ TRỐNG -->
-            <th:block th:if="${#lists.isEmpty(returnBookDtos.rentedBookDtos)}">
+            <th:block th:if="${#lists.isEmpty(returnBookReq.rentedBookDtos)}">
                 <h3>Danh sách trống! Khách hàng đang không mượn truyện nào!</h3>
             </th:block>
             <th:block th:if="${#lists.isEmpty(allPenalties)}">
@@ -36,7 +36,7 @@
             </th:block>
 
             <!-- NẾU CÓ KẾT QUẢ -->
-            <th:block th:unless="${#lists.isEmpty(returnBookDtos.rentedBookDtos)}">
+            <th:block th:unless="${#lists.isEmpty(returnBookReq.rentedBookDtos)}">
                 <div class="row">
                     <table class="table table-bordered table-hover">
                         <thead>
@@ -51,7 +51,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="book,iterStat : ${returnBookDtos.rentedBookDtos}" class="form-group">
+                        <tr th:each="book,iterStat : ${returnBookReq.rentedBookDtos}" class="form-group">
                             <td th:text="${iterStat.count}"></td>
                             <td th:text="${book.code}"></td>
                             <td th:text="${book.titleName}"></td>
@@ -65,7 +65,7 @@
                                 </ul>
                             </td>
                             <td>
-<!--                                <button type="submit" name="action" value="${book.rentedBookId}" class="btn btn-success">Cập Nhật</button>-->
+                                <!--                                <button type="submit" name="action" value="${book.rentedBookId}" class="btn btn-success">Cập Nhật</button>-->
                                 <a th:href="@{/rented-book/{id}/penalties(id=${book.rentedBookId})}"
                                    class="btn btn-success">
                                     <span class="fas fa-plus"></span> Cập Nhật

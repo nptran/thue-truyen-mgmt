@@ -13,6 +13,13 @@
             </button>
             <span th:text="${returnNothing}"></span>
         </div>
+        <div th:if="${invalidBill}" class="row alert alert-danger alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert"
+                    aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+            <span th:text="${invalidBill}"></span>
+        </div>
         <form action="#"
               th:object="${selectedBooks}"
               th:action="@{/rented-book/selectToReturn-of={id}(id=*{customerId})}" method="POST">
