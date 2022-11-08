@@ -46,6 +46,16 @@ public class RentedBookServiceImpl implements RentedBookService {
     }
 
     @Override
+    public List<RentedBook> getRentedBooksById(List<Integer> rentedBookIds) {
+        List<RentedBook> rbs = new ArrayList<>();
+        for (int id : rentedBookIds) {
+            Optional<RentedBook> optional = repository.findById(id);
+            optional.ifPresent(rbs::add);
+        }
+        return rbs;
+    }
+
+    @Override
     @Transactional
     public RentedBook addPenaltiesIntoRentedBook(List<RentedBookPenalty> penalties, List<RentedBookPenaltyKey> removedIds, int id) {
         if (!removedIds.isEmpty()) {

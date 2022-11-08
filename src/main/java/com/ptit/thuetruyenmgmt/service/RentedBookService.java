@@ -13,6 +13,8 @@ public interface RentedBookService {
 
     RentedBook getRentedBookById(int rentedBookId);
 
+    List<RentedBook> getRentedBooksById(List<Integer> rentedBookIds);
+
     RentedBook addPenaltiesIntoRentedBook(List<RentedBookPenalty> penalties, List<RentedBookPenaltyKey> removedPenalties, int id);
 
     boolean updateRentStatus(List<Integer> payBookIds);
