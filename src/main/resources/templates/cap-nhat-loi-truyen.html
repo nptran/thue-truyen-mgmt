@@ -10,6 +10,13 @@
             <h3>Cập Nhật Lỗi Truyện cho Đầu Truyện </h3>
             <p th:text="'Tên Đầu Truyện: ' + ${rentedBook.titleName}"></p>
             <p th:text="'Mã Đầu Truyện: ' + ${rentedBook.code}"></p>
+            <div th:if="${failedMessage}" class="row alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert"
+                        aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <span th:text="${failedMessage}"></span>
+            </div>
 
             <form action="#" th:action="@{/rented-book/{id}/save-penalties(id=*{rentedBookId})}" th:object="${rentedBook}"
                   method="POST" novalidate="novalidate">

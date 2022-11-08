@@ -7,15 +7,23 @@
     <div class="hero list" style="margin: 0px auto 20px auto;">
         <h1 style="color: #313131;">Trả Truyện</h1>
 
+        <div th:if="${savePenaltiesSuccess}" class="row alert alert-success alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert"
+                    aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+            <span th:text="${savePenaltiesSuccess}"></span>
+        </div>
+
         <form action="#"
               th:object="${returnBookDtos}"
-              th:action="@{/customer/show-bill}" method="GET">
+              th:action="@{/customer/show-bill}" method="POST">
             <input class="form-control" type="hidden" name="customerId" th:value="*{customerId}"/>
             <div class="row">
                 <a th:href="@{/customer/rented-books={id}(id=*{customerId})}" class="btn btn-warning pull-left">
                     <span class="fas fa-backward"></span> Quay Lại
                 </a>
-                <button type="submit" class="btn btn-success">Thanh Toán</button>
+                <button type="submit" name="action" value="checkingPay" class="btn btn-success">Thanh Toán</button>
             </div>
 
             <!-- BẢNG DS ĐẦU TRUYỆN ĐANG MƯỢN -->
@@ -57,7 +65,8 @@
                                 </ul>
                             </td>
                             <td>
-                                <a th:href="@{/rented-book/{id}/penalties(id=${book.rentedBookId})}"
+<!--                                <button type="submit" name="action" value="${book.rentedBookId}" class="btn btn-success">Cập Nhật</button>-->
+                                <a th:href="@{/rented-book/{id}/penalties(id=${book.rentedBookId},selected=${selectedBookIds})}"
                                    class="btn btn-success">
                                     <span class="fas fa-plus"></span> Cập Nhật
                                 </a>
