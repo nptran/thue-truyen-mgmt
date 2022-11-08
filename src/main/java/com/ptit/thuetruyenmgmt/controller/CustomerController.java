@@ -1,5 +1,6 @@
 package com.ptit.thuetruyenmgmt.controller;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import com.ptit.thuetruyenmgmt.model.Customer;
@@ -11,6 +12,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -27,9 +29,13 @@ public class CustomerController {
     }
 
     @GetMapping("/customer/search")
-    public String searchCustomer(@RequestParam("kw-name") String customerName, Model model) {
-        model.addAttribute("customers", service.getCustomerByName(customerName));
-        return "search";
+    public ModelAndView searchCustomer(@RequestParam(name = "kw-name", defaultValue = "", required = false) String customerName,
+                                       HttpSession session) {
+        ModelAndView mav = new ModelAndView("search");
+        mav.addObject("customers", service.getCustomerByName(customerName));
+        session.setAttribute("kw-name", customerName);
+
+        return mav;
     }
 
     @PostMapping("/customer/create")

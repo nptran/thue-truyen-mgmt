@@ -57,7 +57,10 @@
                         </tbody>
                     </table>
                 </div>
-                <button type="submit" class="btn btn-primary" style="margin-right:0px">Lưu</button>
+                <button type="submit" class="btn btn-primary pull-right" style="margin-right:0px">Lưu</button>
+                <a th:href="@{/rented-book/selected-of={id}(id=*{customerId})}" class="btn btn-primary pull-left" style="margin-right:0px">
+                    <span class="fas fa-backward"></span> Quay Lại
+                </a>
             </form>
         </div><!-- /.container -->
     </div><!-- /.hero -->

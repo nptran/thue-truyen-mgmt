@@ -18,7 +18,7 @@
               th:action="@{/rented-book/selectToReturn-of={id}(id=*{customerId})}" method="POST">
             <input class="form-control" type="hidden" name="customerId" th:value="*{customerId}"/>
             <div class="row">
-                <a th:href="@{/customer}" class="btn btn-warning pull-left">
+                <a th:href="@{/customer/search(kw-name=${searchKw})}" class="btn btn-warning pull-left">
                     <span class="fas fa-backward"></span> Quay Lại
                 </a>
                 <button type="submit" class="btn btn-success">Trả Truyện</button>
