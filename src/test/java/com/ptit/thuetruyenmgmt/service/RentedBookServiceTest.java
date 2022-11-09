@@ -1,5 +1,7 @@
 package com.ptit.thuetruyenmgmt.service;
 
+import com.ptit.thuetruyenmgmt.exception.FailedToPayException;
+import com.ptit.thuetruyenmgmt.exception.FailedToResetBookPenaltiesException;
 import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.*;
 import com.ptit.thuetruyenmgmt.model.key.RentedBookPenaltyKey;
@@ -29,6 +31,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
 
 @SpringBootTest
 public class RentedBookServiceTest {
@@ -61,7 +64,7 @@ public class RentedBookServiceTest {
 
         Assertions.assertIterableEquals(received, mock);
 
-        Mockito.verify(repository).findAllByCustomer_IdAndIsPaidIsFalse(1);
+        verify(repository, times(1)).findAllByCustomer_IdAndIsPaidIsFalse(1);
     }
 
 
@@ -78,7 +81,7 @@ public class RentedBookServiceTest {
 
         Assertions.assertIterableEquals(received, new ArrayList<>());
 
-        Mockito.verify(repository).findAllByCustomer_IdAndIsPaidIsFalse(1);
+        verify(repository, times(1)).findAllByCustomer_IdAndIsPaidIsFalse(1);
     }
 
 
@@ -100,17 +103,18 @@ public class RentedBookServiceTest {
                 .id(1)
                 .amount(1000)
                 .rentedTime(LocalDateTime.of(2022, 10, 10, 10, 10, 10))
+                .penalties(mockRBP)
                 .isPaid(false).build();
 
         when(repository.findById(1)).thenReturn(Optional.of(mockRentedBook));
         when(rentedBookPenaltyRepository.findAllByRentedBook_Id(1)).thenReturn(mockRBP);
-        mockRentedBook.setPenalties(mockRBP);
 
         RentedBook received = service.getRentedBookById(1);
 
         assertEquals(received, mockRentedBook);
 
-        verify(repository).findById(1);
+        verify(repository, times(1)).findById(1);
+        verify(rentedBookPenaltyRepository, times(1)).findAllByRentedBook_Id(1);
     }
 
 
@@ -135,7 +139,8 @@ public class RentedBookServiceTest {
 
         assertEquals(received, mockRentedBook);
 
-        verify(repository).findById(1);
+        verify(repository, times(1)).findById(1);
+        verify(rentedBookPenaltyRepository, times(1)).findAllByRentedBook_Id(1);
     }
 
 
@@ -151,7 +156,7 @@ public class RentedBookServiceTest {
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.getRentedBookById(1))
                 .isInstanceOf(NotFoundException.class);
 
-        verify(repository).findById(1);
+        verify(repository, times(1)).findById(1);
     }
 
 
@@ -173,8 +178,8 @@ public class RentedBookServiceTest {
 
         assertIterableEquals(received, mock);
 
-        for (RentedBook m : mock) {
-            verify(repository).findById(m.getId());
+        for (int id : ids) {
+            verify(repository, times(1)).findById(id);
         }
     }
 
@@ -198,7 +203,7 @@ public class RentedBookServiceTest {
         assertIterableEquals(received, mock);
 
         for (int id : ids) {
-            verify(repository).findById(id);
+            verify(repository, times(1)).findById(id);
         }
     }
 
@@ -216,13 +221,13 @@ public class RentedBookServiceTest {
             when(repository.findById(m.getId())).thenReturn(Optional.of(m));
         }
 
-        List<Integer> ids = IntStream.range(3, 6).boxed().collect(Collectors.toList());
+        List<Integer> ids = getListOfInts(3, 6);
         List<RentedBook> received = service.getRentedBooksById(ids);
 
         assertIterableEquals(received, new ArrayList<>());
 
         for (int id : ids) {
-            verify(repository).findById(id);
+            verify(repository, times(1)).findById(id);
         }
     }
 
@@ -231,21 +236,301 @@ public class RentedBookServiceTest {
      */
     @Test
     void whenAddPenaltiesIntoRentedBook_shouldResetTheRentedBookPenalties() {
-        List<RentedBookPenaltyKey> ids = IntStream.range(0, 3)
-                .mapToObj(i -> RentedBookPenaltyKey.builder().rentedBookId(i).penaltyId(i).build())
-                .collect(Collectors.toList());
+        List<RentedBookPenaltyKey> ids = getListOfRentedBookPenaltyKey(0, 3);
+        // Mock để penalties không empty
         List<RentedBookPenalty> penalties = new ArrayList<>();
+        RentedBookPenalty mockPen = new RentedBookPenalty();
+        penalties.add(mockPen);
+
+        RentedBook mock = RentedBook.builder().id(1).build();
+
         doNothing().when(rentedBookPenaltyRepository).deleteAllByIdInBatch(ids);
         doNothing().when(rentedBookPenaltyRepository).flush();
-        doNothing().when(rentedBookPenaltyRepository).saveAllAndFlush(penalties);
+        when(rentedBookPenaltyRepository.saveAllAndFlush(penalties)).thenReturn(penalties);
+
+        when(repository.findById(1)).thenReturn(Optional.of(mock));
+
+        RentedBook received = service.addPenaltiesIntoRentedBook(penalties, ids, mock.getId());
+
+        assertEquals(received, mock);
+
+        verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(ids);
+        verify(rentedBookPenaltyRepository, times(1)).flush();
+        verify(rentedBookPenaltyRepository, times(1)).saveAllAndFlush(penalties);
+        verify(repository, times(1)).findById(1);
+    }
 
 
+    /**
+     * Có lỗi trong khi delete.
+     * Throw FailedToResetBookPenaltiesException
+     */
+    @Test
+    void whenAddPenaltiesIntoRentedBook_failedDelete_shouldThrowFailedToResetBookPenaltiesException() {
+        List<RentedBookPenalty> penalties = new ArrayList<>();
+        RentedBook mock = RentedBook.builder().id(1).build();
+        List<RentedBookPenaltyKey> ids = getListOfRentedBookPenaltyKey(0, 3);
 
+        doThrow(RuntimeException.class).when(rentedBookPenaltyRepository).deleteAllByIdInBatch(ids);
+//        doNothing().when(rentedBookPenaltyRepository).flush();
+//        doNothing().when(rentedBookPenaltyRepository).saveAllAndFlush(penalties);
+//
+//        when(repository.findById(1)).thenReturn(Optional.of(mock));
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                        () -> service.addPenaltiesIntoRentedBook(penalties, ids, mock.getId()))
+                .isInstanceOf(FailedToResetBookPenaltiesException.class);
+
+        verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(ids);
+        verify(rentedBookPenaltyRepository, times(0)).flush();
+        verify(rentedBookPenaltyRepository, times(0)).saveAllAndFlush(penalties);
+        verify(repository, times(0)).findById(1);
+    }
+
+
+    /**
+     * Có lỗi trong khi flush.
+     * Throw FailedToResetBookPenaltiesException
+     */
+    @Test
+    void whenAddPenaltiesIntoRentedBook_failedFlush_shouldThrowFailedToResetBookPenaltiesException() {
+        List<RentedBookPenalty> penalties = new ArrayList<>();
+        RentedBook mock = RentedBook.builder().id(1).build();
+        List<RentedBookPenaltyKey> ids = getListOfRentedBookPenaltyKey(0, 3);
+
+        doNothing().when(rentedBookPenaltyRepository).deleteAllByIdInBatch(ids);
+        doThrow(RuntimeException.class).when(rentedBookPenaltyRepository).flush();
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                        () -> service.addPenaltiesIntoRentedBook(penalties, ids, mock.getId()))
+                .isInstanceOf(FailedToResetBookPenaltiesException.class);
+
+        verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(ids);
+        verify(rentedBookPenaltyRepository, times(1)).flush();
+        verify(rentedBookPenaltyRepository, times(0)).saveAllAndFlush(penalties);
+        verify(repository, times(0)).findById(1);
+    }
+
+
+    /**
+     * Có lỗi trong khi save.
+     * Throw FailedToResetBookPenaltiesException
+     */
+    @Test
+    void whenAddPenaltiesIntoRentedBook_failedSave_shouldThrowFailedToResetBookPenaltiesException() {
+        RentedBook mock = RentedBook.builder().id(1).build();
+        List<RentedBookPenaltyKey> ids = getListOfRentedBookPenaltyKey(0, 3);
+        // Mock để penalties không empty
+        List<RentedBookPenalty> penalties = new ArrayList<>();
+        RentedBookPenalty mockPen = new RentedBookPenalty();
+        penalties.add(mockPen);
+
+        doNothing().when(rentedBookPenaltyRepository).deleteAllByIdInBatch(ids);
+        doNothing().when(rentedBookPenaltyRepository).flush();
+        when(rentedBookPenaltyRepository.saveAllAndFlush(penalties)).thenThrow(new RuntimeException());
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                        () -> service.addPenaltiesIntoRentedBook(penalties, ids, mock.getId()))
+                .isInstanceOf(FailedToResetBookPenaltiesException.class);
+
+        verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(ids);
+        verify(rentedBookPenaltyRepository, times(1)).flush();
+        verify(rentedBookPenaltyRepository, times(1)).saveAllAndFlush(penalties);
+        verify(repository, times(0)).findById(mock.getId());
+    }
+
+
+    /**
+     * Không tìm thấy RentedBook.
+     * Throw NotFoundException
+     */
+    @Test
+    void whenAddPenaltiesIntoRentedBook_failedFindRentedBook_shouldThrowNotFoundException() {
+        List<RentedBookPenalty> penalties = new ArrayList<>();
+        RentedBookPenalty mockPen = new RentedBookPenalty();
+        penalties.add(mockPen);
+        RentedBook mock = RentedBook.builder().id(1).build();
+        List<RentedBookPenaltyKey> ids = getListOfRentedBookPenaltyKey(0, 3);
+
+        doNothing().when(rentedBookPenaltyRepository).deleteAllByIdInBatch(ids);
+        doNothing().when(rentedBookPenaltyRepository).flush();
+        when(rentedBookPenaltyRepository.saveAllAndFlush(penalties)).thenReturn(penalties);
+        when(repository.findById(1)).thenReturn(Optional.ofNullable(null));
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                        () -> service.addPenaltiesIntoRentedBook(penalties, ids, mock.getId()))
+                .isInstanceOf(NotFoundException.class);
+
+        verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(ids);
+        verify(rentedBookPenaltyRepository, times(1)).flush();
+        verify(rentedBookPenaltyRepository, times(1)).saveAllAndFlush(penalties);
+        verify(repository, times(1)).findById(1);
+    }
+
+
+    /**
+     * @NEGATIVE: Tham số DS Lỗi truyện hiện tại là rỗng
+     */
+    @Test
+    void whenAddPenaltiesIntoRentedBook_emptyRemovedIds() {
+        RentedBook mock = RentedBook.builder().id(1).build();
+        // DS Lỗi truyện hiện tại là rỗng
+        List<RentedBookPenaltyKey> currIds = new ArrayList<>();
+
+        // 2 pen mới
+        List<RentedBookPenalty> newPenalties = getListOfRentedBookPenalties(mock.getId(), 1, 2, 1000);
+        mock.setPenalties(newPenalties);
+
+        when(rentedBookPenaltyRepository.saveAllAndFlush(newPenalties)).thenReturn(newPenalties);
+        when(repository.findById(mock.getId())).thenReturn(Optional.of(mock));
+
+        RentedBook received = service.addPenaltiesIntoRentedBook(newPenalties, currIds, mock.getId());
+
+        assertEquals(received, mock);
+
+        verify(rentedBookPenaltyRepository, times(0)).deleteAllByIdInBatch(currIds);
+        verify(rentedBookPenaltyRepository, times(0)).flush();
+        verify(rentedBookPenaltyRepository, times(1)).saveAllAndFlush(newPenalties);
+        verify(repository, times(1)).findById(mock.getId());
+    }
+
+
+    /**
+     * @NEGATIVE: Tham số DS Lỗi truyện hiện tại là NULL
+     */
+    @Test
+    void whenAddPenaltiesIntoRentedBook_nullRemovedIds() {
+        RentedBook mock = RentedBook.builder().id(1).build();
+        // DS Lỗi truyện hiện tại là rỗng
+        List<RentedBookPenaltyKey> currIds = null;
+
+        // 2 pen mới
+        List<RentedBookPenalty> newPenalties = getListOfRentedBookPenalties(mock.getId(), 1, 2, 1000);
+        mock.setPenalties(newPenalties);
+
+        when(rentedBookPenaltyRepository.saveAllAndFlush(newPenalties)).thenReturn(newPenalties);
+        when(repository.findById(mock.getId())).thenReturn(Optional.of(mock));
+
+        RentedBook received = service.addPenaltiesIntoRentedBook(newPenalties, currIds, mock.getId());
+
+        assertEquals(received, mock);
+
+        verify(rentedBookPenaltyRepository, times(0)).deleteAllByIdInBatch(currIds);
+        verify(rentedBookPenaltyRepository, times(0)).flush();
+        verify(rentedBookPenaltyRepository, times(1)).saveAllAndFlush(newPenalties);
+        verify(repository, times(1)).findById(mock.getId());
+    }
+
+
+    /**
+     * @NEGATIVE: DS Lỗi truyện mới của truyện là rỗng (Clean toàn bộ lỗi của truyện).
+     */
+    @Test
+    void whenAddPenaltiesIntoRentedBook_emptyNewPenalties() {
+        RentedBook mock = RentedBook.builder().id(1).build();
+        // Lỗi hiện tại có 2
+        List<RentedBookPenaltyKey> currIds = getListOfRentedBookPenaltyKey(1, 2);
+        // Lỗi truyện mới là rỗng
+        List<RentedBookPenalty> newPenalties = new ArrayList<>();
+
+        doNothing().when(rentedBookPenaltyRepository).deleteAllByIdInBatch(currIds);
+        doNothing().when(rentedBookPenaltyRepository).flush();
+        when(rentedBookPenaltyRepository.saveAllAndFlush(newPenalties)).thenReturn(newPenalties);
+        when(repository.findById(mock.getId())).thenReturn(Optional.of(mock));
+
+        RentedBook received = service.addPenaltiesIntoRentedBook(newPenalties, currIds, mock.getId());
+
+        assertNull(received.getPenalties());
+        assertEquals(received, mock);
+
+        verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(currIds);
+        verify(rentedBookPenaltyRepository, times(1)).flush();
+        verify(rentedBookPenaltyRepository, times(0)).saveAllAndFlush(newPenalties);
+        verify(repository, times(1)).findById(mock.getId());
+    }
+
+
+    /**
+     * @NEGATIVE: DS Lỗi truyện mới của truyện là NULL (Clean toàn bộ lỗi của truyện).
+     */
+    @Test
+    void whenAddPenaltiesIntoRentedBook_nullNewPenalties() {
+        RentedBook mock = RentedBook.builder().id(1).build();
+        // Lỗi hiện tại có 2
+        List<RentedBookPenaltyKey> currIds = getListOfRentedBookPenaltyKey(1, 2);
+        // Lỗi truyện mới là rỗng
+        List<RentedBookPenalty> newPenalties = null;
+
+        doNothing().when(rentedBookPenaltyRepository).deleteAllByIdInBatch(currIds);
+        doNothing().when(rentedBookPenaltyRepository).flush();
+        when(rentedBookPenaltyRepository.saveAllAndFlush(newPenalties)).thenReturn(newPenalties);
+        when(repository.findById(mock.getId())).thenReturn(Optional.of(mock));
+
+        RentedBook received = service.addPenaltiesIntoRentedBook(newPenalties, currIds, mock.getId());
+
+        assertNull(received.getPenalties());
+        assertEquals(received, mock);
+
+        verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(currIds);
+        verify(rentedBookPenaltyRepository, times(1)).flush();
+        verify(rentedBookPenaltyRepository, times(0)).saveAllAndFlush(newPenalties);
+        verify(repository, times(1)).findById(mock.getId());
+    }
+
+
+    /**
+     * @POSITIVE: Có DS rentedBookPenalty đầu vào hợp lệ
+     * → Trả về DS penalty tương ứng
+     */
+    @Test
+    void whenRentedBookPenaltiesToPenalties_shouldReturnPenalties() {
+        List<RentedBookPenalty> mock = getListOfRentedBookPenalties(1, 1, 2, 1000);
+
+        List<Penalty> expected = new ArrayList<>();
+        expected.add(Penalty.builder().id(1).recommendedFee(1000).build());
+        expected.add(Penalty.builder().id(2).recommendedFee(1000).build());
+
+        List<Penalty> actual = service.rentedBookPenaltiesToPenalties(mock);
+
+        assertEquals(actual, expected);
+
+    }
+
+    /**
+     * @NEGATIVE: Có DS rentedBookPenalty đầu vào null
+     * → Trả về DS penalty rỗng
+     */
+    @Test
+    void whenRentedBookPenaltiesToPenalties_shouldReturnEmpty() {
+        List<Penalty> actual = service.rentedBookPenaltiesToPenalties(null);
+
+        assertEquals(actual, new ArrayList<>());
     }
 
 
     private List<Integer> getListOfInts(int from, int to) {
         return IntStream.range(from, to).boxed().collect(Collectors.toList());
+    }
+
+
+    private List<RentedBookPenaltyKey> getListOfRentedBookPenaltyKey(int fromID, int toID) {
+        return IntStream.range(fromID, toID + 1)
+                .mapToObj(i -> RentedBookPenaltyKey.builder().rentedBookId(i).penaltyId(i).build())
+                .collect(Collectors.toList());
+    }
+
+
+    private List<RentedBookPenalty> getListOfRentedBookPenalties(int bookID, int fromPenID, int toPenID, double fee) {
+        return IntStream.range(fromPenID, toPenID + 1)
+                .mapToObj(i -> RentedBookPenalty.builder()
+                        .id(new RentedBookPenaltyKey(bookID, i))
+                        .fee(fee)
+                        .penalty(Penalty.builder()
+                                .id(i)
+                                .recommendedFee(fee)
+                                .build())
+                        .build()
+                ).collect(Collectors.toList());
     }
 
 

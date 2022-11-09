@@ -27,7 +27,7 @@ public class RentedBookServiceImpl implements RentedBookService {
     @Autowired
     private RentedBookPenaltyRepository rentedBookPenaltyRepository;
 
-    private static final String RESOURCE_NAME = Customer.class.getSimpleName();
+    private static final String RESOURCE_NAME = RentedBook.class.getSimpleName();
 
 
     @Override
@@ -61,6 +61,7 @@ public class RentedBookServiceImpl implements RentedBookService {
 
 
     @Override
+    @Transactional
     public RentedBook addPenaltiesIntoRentedBook(List<RentedBookPenalty> penalties, List<RentedBookPenaltyKey> removedIds, int id) {
         try {
             // Xoá các RentedBookPenalty hiện tại
@@ -73,7 +74,7 @@ public class RentedBookServiceImpl implements RentedBookService {
             if (penalties != null && !penalties.isEmpty()) {
                 rentedBookPenaltyRepository.saveAllAndFlush(penalties);
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new FailedToResetBookPenaltiesException(e.getMessage());
         }
         Optional<RentedBook> optional = repository.findById(id);

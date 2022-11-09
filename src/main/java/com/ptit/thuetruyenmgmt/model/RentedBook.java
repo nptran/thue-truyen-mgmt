@@ -49,7 +49,7 @@ public class RentedBook implements Serializable {
     /**
      * Map sang rentedBook trong {@link RentedBookPenalty#rentedBook}
      */
-    @OneToMany(mappedBy = "rentedBook", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "rentedBook", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<RentedBookPenalty> penalties;
 
     @Column
