@@ -104,11 +104,11 @@ public class BillController {
                                 HttpSession session,
                                 RedirectAttributes redirect) {
         Customer customer = customerService.getCustomerById(customerId);
-//        if (!service.saveBillInfo(bill)) {
-//            redirect.addFlashAttribute("invalidBill",
-//                    "Tạo thanh toán thất bại!!! Không có đầu truyện nào được chọn.");
-//            return new ModelAndView("redirect:/customer/rented-books=" + customerId);
-//        }
+        if (!service.saveBillInfo(bill)) {
+            redirect.addFlashAttribute("invalidBill",
+                    "Tạo thanh toán thất bại!!! Không có đầu truyện nào được chọn.");
+            return new ModelAndView("redirect:/customer/rented-books=" + customerId);
+        }
 
         // Reset lại Đầu truyện chọn để trả
         session.removeAttribute("selectedBookIds");
