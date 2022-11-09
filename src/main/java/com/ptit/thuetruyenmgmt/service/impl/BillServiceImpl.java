@@ -1,6 +1,7 @@
 package com.ptit.thuetruyenmgmt.service.impl;
 
 import com.ptit.thuetruyenmgmt.exception.FailedToPayException;
+import com.ptit.thuetruyenmgmt.exception.NoneSelectedBookToReturnException;
 import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.*;
 import com.ptit.thuetruyenmgmt.model.request.RentedBookDTO;
@@ -47,6 +48,9 @@ public class BillServiceImpl implements BillService {
         }
         Staff staff = staffOptional.get();
 
+        if (rentedBooks == null || rentedBooks.isEmpty()) {
+            throw new NoneSelectedBookToReturnException();
+        }
 
         LocalDateTime now = LocalDateTime.now();
         double totalAmount = 0;
@@ -65,7 +69,14 @@ public class BillServiceImpl implements BillService {
     @Override
     @Transactional
     public boolean saveBillInfo(Bill bill) {
-        repository.save(bill);
+        if (bill.getRentedBooks() == null || bill.getRentedBooks().isEmpty()) {
+            throw new NoneSelectedBookToReturnException();
+        }
+        try {
+            repository.save(bill);
+        } catch (Exception e) {
+            throw new FailedToPayException("Không thể lưu thanh toán");
+        }
         for (RentedBook paidBook: bill.getRentedBooks()) {
             paidBook.setPaid(true);
         }
@@ -74,9 +85,6 @@ public class BillServiceImpl implements BillService {
 
 
     private boolean updateRentStatus(List<RentedBook> paidBooks) {
-        if (paidBooks == null || paidBooks.isEmpty()) {
-            throw new FailedToPayException("Không có Đầu truyện nào để thanh toán");
-        }
         // Kiểm tra sự tồn tại trong CSDL
         for (RentedBook paidBook : paidBooks) {
             int id = paidBook.getId();
@@ -100,7 +108,7 @@ public class BillServiceImpl implements BillService {
         LocalDateTime rentedFrom = book.getRentedTime();
         Duration totalTime = Duration.between(rentedFrom, now);
         long hours = totalTime.toHours();
-        amount *= (double) hours / 24; // Chia ra nhân với giá thuê theo ngày
+        amount *= (double) hours / 24; // Chia ra nhân với giá thuê theo 24h
 
         for (RentedBookPenalty p : book.getPenalties()) {
             amount += p.getFee();

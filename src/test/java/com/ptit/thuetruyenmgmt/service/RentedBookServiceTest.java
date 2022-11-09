@@ -252,7 +252,7 @@ public class RentedBookServiceTest {
 
         RentedBook received = service.addPenaltiesIntoRentedBook(penalties, ids, mock.getId());
 
-        assertEquals(received, mock);
+        assertEquals(mock, received);
 
         verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(ids);
         verify(rentedBookPenaltyRepository, times(1)).flush();
@@ -386,7 +386,7 @@ public class RentedBookServiceTest {
 
         RentedBook received = service.addPenaltiesIntoRentedBook(newPenalties, currIds, mock.getId());
 
-        assertEquals(received, mock);
+        assertEquals(mock, received);
 
         verify(rentedBookPenaltyRepository, times(0)).deleteAllByIdInBatch(currIds);
         verify(rentedBookPenaltyRepository, times(0)).flush();
@@ -413,7 +413,7 @@ public class RentedBookServiceTest {
 
         RentedBook received = service.addPenaltiesIntoRentedBook(newPenalties, currIds, mock.getId());
 
-        assertEquals(received, mock);
+        assertEquals(mock, received);
 
         verify(rentedBookPenaltyRepository, times(0)).deleteAllByIdInBatch(currIds);
         verify(rentedBookPenaltyRepository, times(0)).flush();
@@ -441,7 +441,7 @@ public class RentedBookServiceTest {
         RentedBook received = service.addPenaltiesIntoRentedBook(newPenalties, currIds, mock.getId());
 
         assertNull(received.getPenalties());
-        assertEquals(received, mock);
+        assertEquals(mock, received);
 
         verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(currIds);
         verify(rentedBookPenaltyRepository, times(1)).flush();
@@ -469,7 +469,7 @@ public class RentedBookServiceTest {
         RentedBook received = service.addPenaltiesIntoRentedBook(newPenalties, currIds, mock.getId());
 
         assertNull(received.getPenalties());
-        assertEquals(received, mock);
+        assertEquals(mock, received);
 
         verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(currIds);
         verify(rentedBookPenaltyRepository, times(1)).flush();
