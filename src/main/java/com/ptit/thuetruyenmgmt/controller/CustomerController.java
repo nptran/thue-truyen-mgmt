@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 @Controller
 public class CustomerController {
 
@@ -24,7 +26,6 @@ public class CustomerController {
     // Gọi trang giao diện search hiển thị
     @GetMapping(path = {"/customer"})
     public String index() {
-//        model.addAttribute("customers", studentService.getAll());
         return "search";
     }
 
@@ -32,7 +33,8 @@ public class CustomerController {
     public ModelAndView searchCustomer(@RequestParam(name = "kw-name", defaultValue = "", required = false) String customerName,
                                        HttpSession session) {
         ModelAndView mav = new ModelAndView("search");
-        mav.addObject("customers", service.getCustomerByName(customerName));
+        List<Customer> foundCustomers = service.getCustomerByName(customerName);
+        mav.addObject("customers", foundCustomers);
         session.setAttribute("kw-name", customerName);
 
         return mav;

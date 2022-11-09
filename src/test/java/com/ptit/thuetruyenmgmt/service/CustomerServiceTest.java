@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -38,7 +39,7 @@ public class CustomerServiceTest {
      * POSITIVE CASE: Repository có trả về ds KH - có dữ liệu
      */
     @Test
-    public void whenGetCustomerByName_EmptyName_shouldReturnAllCustomers() {
+    public void whenGetCustomerByName_shouldReturnCustomers() {
         List<Customer> mockCustomers = IntStream.range(0, 5)
                 .mapToObj(i -> new Customer(i,
                         1000 + i,
@@ -50,7 +51,6 @@ public class CustomerServiceTest {
                         null
                 ))
                 .collect(Collectors.toList());
-
         String mockKeyword = "Name";
         when(repository.findByName(mockKeyword))
                 .thenReturn(mockCustomers);
@@ -58,6 +58,22 @@ public class CustomerServiceTest {
         List<Customer> receivedCustomers = service.getCustomerByName(mockKeyword);
 
         assertEquals(receivedCustomers.size(), mockCustomers.size());
+
+        verify(repository).findByName(mockKeyword);
+    }
+
+
+    /**
+     * POSITIVE CASE: Repository có trả về ds KH - không có dữ liệu
+     */
+    @Test
+    public void whenGetCustomerByName_shouldReturnEmpty() {
+        List<Customer> mockCustomers = new ArrayList<>();
+        String mockKeyword = "Name";
+        when(repository.findByName(mockKeyword))
+                .thenReturn(mockCustomers);
+
+        assertEquals(0, mockCustomers.size());
 
         verify(repository).findByName(mockKeyword);
     }
