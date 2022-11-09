@@ -1,10 +1,12 @@
 package com.ptit.thuetruyenmgmt.service;
 
+import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.Address;
 import com.ptit.thuetruyenmgmt.model.Customer;
 import com.ptit.thuetruyenmgmt.model.FullName;
 import com.ptit.thuetruyenmgmt.repository.CustomerRepository;
 import com.ptit.thuetruyenmgmt.service.impl.CustomerServiceImpl;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -15,12 +17,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest
@@ -36,10 +39,12 @@ public class CustomerServiceTest {
 
 
     /**
-     * POSITIVE CASE: Repository có trả về ds KH - có dữ liệu
+     * {@link CustomerServiceImpl#getCustomerByName(String)}
+     *
+     * @POSITIVE_CASE: Repository có trả về ds KH - có dữ liệu
      */
     @Test
-    public void whenGetCustomerByName_shouldReturnCustomers() {
+    void whenGetCustomerByName_shouldReturnCustomers() {
         List<Customer> mockCustomers = IntStream.range(0, 5)
                 .mapToObj(i -> new Customer(i,
                         1000 + i,
@@ -64,18 +69,54 @@ public class CustomerServiceTest {
 
 
     /**
-     * POSITIVE CASE: Repository có trả về ds KH - không có dữ liệu
+     * {@link CustomerServiceImpl#getCustomerByName(String)}
+     *
+     * @POSITIVE_CASE: Repository có trả về ds KH - không có dữ liệu
      */
     @Test
-    public void whenGetCustomerByName_shouldReturnEmpty() {
-        List<Customer> mockCustomers = new ArrayList<>();
+    void whenGetCustomerByName_shouldReturnEmpty() {
         String mockKeyword = "Name";
         when(repository.findByName(mockKeyword))
-                .thenReturn(mockCustomers);
+                .thenReturn(new ArrayList<>());
 
-        assertEquals(0, mockCustomers.size());
+        List<Customer> receivedCustomers = service.getCustomerByName(mockKeyword);
+        assertEquals(0, receivedCustomers.size());
 
         verify(repository).findByName(mockKeyword);
+    }
+
+
+    /**
+     * {@link CustomerServiceImpl#getCustomerById(int)}
+     *
+     * @POSITIVE_CASE: Repository có trả về ds KH - không có dữ liệu
+     */
+    @Test
+    void whenGetCustomerById_shouldReturnACustomer() {
+        Customer mock = Customer.builder().id(1).cccd(10000).build();
+        when(repository.findById(1)).thenReturn(Optional.of(mock));
+
+        Customer received = service.getCustomerById(1);
+
+        assertEquals(received, mock);
+
+        verify(repository).findById(1);
+    }
+
+
+    /**
+     * {@link CustomerServiceImpl#getCustomerById(int)}
+     *
+     * @NEGATIVE_CASE: Repository có trả về ds KH - không có dữ liệu
+     */
+    @Test
+    void whenGetCustomerById_shouldThrowNotFoundException() {
+        when(repository.findById(1)).thenReturn(Optional.ofNullable(null));
+
+        Assertions.assertThatThrownBy(() -> service.getCustomerById(1))
+                .isInstanceOf(NotFoundException.class);
+
+        verify(repository).findById(1);
     }
 
 }
