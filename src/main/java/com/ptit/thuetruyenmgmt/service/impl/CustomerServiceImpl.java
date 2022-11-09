@@ -33,8 +33,8 @@ public class CustomerServiceImpl implements CustomerService {
         return repository.findByName(name);
     }
 
-    @Override
-    public Customer createCustomer(Customer customer) {
-        return repository.save(customer);
-    }
+//    @Override
+//    public Customer createCustomer(Customer customer) {
+//        return repository.save(customer);
+//    }
 }

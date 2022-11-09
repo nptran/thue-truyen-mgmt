@@ -38,11 +38,11 @@ public class CustomerController {
         return mav;
     }
 
-    @PostMapping("/customer/create")
-    public String save(@Valid Customer customer, BindingResult result, RedirectAttributes redirect) {
-        service.createCustomer(customer);
-        redirect.addFlashAttribute("success", "Saved customer successfully!");
-        return "redirect:/customer";
-    }
+//    @PostMapping("/customer/create")
+//    public String save(@Valid Customer customer, BindingResult result, RedirectAttributes redirect) {
+//        service.createCustomer(customer);
+//        redirect.addFlashAttribute("success", "Saved customer successfully!");
+//        return "redirect:/customer";
+//    }
 
 }

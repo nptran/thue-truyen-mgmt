@@ -10,6 +10,6 @@ public interface CustomerService {
 
     List<Customer> getCustomerByName(String name);
 
-    Customer createCustomer(Customer customer);
+//    Customer createCustomer(Customer customer);
 
 }
