@@ -17,10 +17,6 @@ public interface RentedBookService {
 
     RentedBook addPenaltiesIntoRentedBook(List<RentedBookPenalty> penalties, List<RentedBookPenaltyKey> removedPenalties, int id);
 
-    boolean updateRentStatus(List<Integer> payBookIds);
-
-    int deleteCurrentPenaltiesOfRentedBook(int bookId);
-
     List<Penalty> rentedBookPenaltiesToPenalties(List<RentedBookPenalty> rentedBookPenalties);
 
 }

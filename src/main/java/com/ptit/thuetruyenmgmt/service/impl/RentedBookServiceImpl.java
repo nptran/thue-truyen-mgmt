@@ -1,6 +1,7 @@
 package com.ptit.thuetruyenmgmt.service.impl;
 
 import com.ptit.thuetruyenmgmt.exception.FailedToPayException;
+import com.ptit.thuetruyenmgmt.exception.FailedToResetBookPenaltiesException;
 import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.Customer;
 import com.ptit.thuetruyenmgmt.model.Penalty;
@@ -34,6 +35,7 @@ public class RentedBookServiceImpl implements RentedBookService {
         return repository.findAllByCustomer_IdAndIsPaidIsFalse(customerId);
     }
 
+
     @Override
     public RentedBook getRentedBookById(int rentedBookId) {
         Optional<RentedBook> optional = repository.findById(rentedBookId);
@@ -46,6 +48,7 @@ public class RentedBookServiceImpl implements RentedBookService {
         return optional.get();
     }
 
+
     @Override
     public List<RentedBook> getRentedBooksById(List<Integer> rentedBookIds) {
         List<RentedBook> rbs = new ArrayList<>();
@@ -56,64 +59,30 @@ public class RentedBookServiceImpl implements RentedBookService {
         return rbs;
     }
 
+
     @Override
-    @Transactional
     public RentedBook addPenaltiesIntoRentedBook(List<RentedBookPenalty> penalties, List<RentedBookPenaltyKey> removedIds, int id) {
-        if (!removedIds.isEmpty()) {
-            rentedBookPenaltyRepository.deleteAllByIdInBatch(removedIds);
+        try {
+            // Xoá các RentedBookPenalty hiện tại
+            if (removedIds != null && !removedIds.isEmpty()) {
+                rentedBookPenaltyRepository.deleteAllByIdInBatch(removedIds);
+                rentedBookPenaltyRepository.flush();
+            }
+
+            // Lưu lại DS các RentedBookPenalty mới
+            if (penalties != null && !penalties.isEmpty()) {
+                rentedBookPenaltyRepository.saveAllAndFlush(penalties);
+            }
+        } catch (Exception e) {
+            throw new FailedToResetBookPenaltiesException(e.getMessage());
         }
-//        rentedBookPenaltyRepository.deleteAllByIdInBatch();
-        rentedBookPenaltyRepository.flush();
-        // Xoá các RentedBookPenalty hiện tại
-//        int rows = rentedBookPenaltyRepository.cleanPenaltiesOfRentedBook(id);
-//        rentedBookPenaltyRepository.flush();
-
-        // Lưu lại DS các RentedBookPenalty mới
-//        List<RentedBookPenalty> news = penalties;
-//        rentedBookPenaltyRepository.saveAllAndFlush(news);
-
-        rentedBookPenaltyRepository.saveAllAndFlush(penalties);
         Optional<RentedBook> optional = repository.findById(id);
         if (!optional.isPresent()) {
             throw new NotFoundException(RESOURCE_NAME);
         }
-        RentedBook rentedBook = optional.get();
-//        rentedBook.setPenalties(penalties);
-
         return optional.get();
     }
 
-    @Override
-    @Transactional
-    public boolean updateRentStatus(List<Integer> payBookIds) {
-        List<RentedBook> paidBooks = new ArrayList<>();
-        for (int id : payBookIds) {
-            Optional<RentedBook> optional = repository.findById(id);
-            if (optional.isPresent()) {
-                RentedBook paidBook = optional.get();
-                paidBook.setPaid(true);
-                paidBooks.add(paidBook);
-            } else {
-                throw new FailedToPayException("Đầu truyện ID `" + id + "` không tồn tại.");
-            }
-        }
-
-        try {
-            repository.saveAllAndFlush(paidBooks);
-        } catch (Exception e) {
-            throw new FailedToPayException(e.getMessage());
-        }
-        return true;
-    }
-
-    @Override
-    public int deleteCurrentPenaltiesOfRentedBook(int bookId) {
-        // Xoá các RentedBookPenalty hiện tại
-        int rows = rentedBookPenaltyRepository.cleanPenaltiesOfRentedBook(bookId);
-//        rentedBookPenaltyRepository.flush();
-//        rentedBookPenaltyRepository.refresh();
-        return rows;
-    }
 
     @Override
     public List<Penalty> rentedBookPenaltiesToPenalties(List<RentedBookPenalty> rentedBookPenalties) {

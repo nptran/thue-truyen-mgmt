@@ -62,7 +62,7 @@ public class CustomerServiceTest {
 
         List<Customer> receivedCustomers = service.getCustomerByName(mockKeyword);
 
-        assertEquals(receivedCustomers.size(), mockCustomers.size());
+        assertIterableEquals(receivedCustomers, mockCustomers);
 
         verify(repository).findByName(mockKeyword);
     }
