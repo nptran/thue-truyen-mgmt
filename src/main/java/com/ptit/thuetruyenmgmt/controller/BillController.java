@@ -12,10 +12,7 @@ import com.ptit.thuetruyenmgmt.service.RentedBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -47,7 +44,7 @@ public class BillController {
      * @return
      */
     @PostMapping("/customer/check-bill")
-    public ModelAndView checkAndGenerateBillInfo(@RequestParam("customerId") int customerId,
+    public ModelAndView checkAndGenerateBillInfo(@RequestParam("customerId") Integer customerId,
                                                  HttpSession session,
                                                  RedirectAttributes redirect) {
 
@@ -71,8 +68,8 @@ public class BillController {
      * @param redirect
      * @return
      */
-    @GetMapping("/customer/show-bill")
-    public ModelAndView generateBillInfo(@RequestParam("customerId") int customerId,
+    @GetMapping(value = "/customer/show-bill", params = {"!paid"})
+    public ModelAndView generateBillInfo(@RequestParam("customerId") Integer customerId,
                                          HttpSession session,
                                          RedirectAttributes redirect) {
         // Xử lý tạo thông tin hoá đơn
@@ -80,7 +77,7 @@ public class BillController {
         List<Integer> bookIds = (List<Integer>) session.getAttribute("selectedBookIds");
 
         List<RentedBook> rentedBooks = rentedBookService.getRentedBooksById(bookIds);
-        Bill billInfo = service.createBillInfo(rentedBooks, 1);
+        Bill billInfo = service.createPayInfo(rentedBooks, 1);
 
         ModelAndView mav = new ModelAndView("xac-nhan-thanh-toan");
         mav.addObject("customerId", customerId);
@@ -91,9 +88,50 @@ public class BillController {
         return mav;
     }
 
+
+    /**
+     * Thực hiện thanh toán sau đó gọi để hiển thị kết quả.
+     *
+     * @param customerId
+     * @param bill
+     * @param session
+     * @param redirect
+     * @return
+     */
     @PostMapping("/customer/create-bill")
-    public ModelAndView payBill() {
-        return null;
+    public ModelAndView payBill(@RequestParam("customerId") Integer customerId,
+                                @Valid Bill bill,
+                                HttpSession session,
+                                RedirectAttributes redirect) {
+        Customer customer = customerService.getCustomerById(customerId);
+//        if (!service.saveBillInfo(bill)) {
+//            redirect.addFlashAttribute("invalidBill",
+//                    "Tạo thanh toán thất bại!!! Không có đầu truyện nào được chọn.");
+//            return new ModelAndView("redirect:/customer/rented-books=" + customerId);
+//        }
+
+        // Reset lại Đầu truyện chọn để trả
+        session.removeAttribute("selectedBookIds");
+        redirect.addFlashAttribute("bill", bill);
+        redirect.addFlashAttribute("customerInfo", customer);
+        redirect.addFlashAttribute("paySuccess", true);
+        return new ModelAndView("redirect:/customer/show-bill?customerId=" + customerId + "&paid=true");
+    }
+
+
+    /**
+     * Hiển thị Thông báo kết quả nếu thanh toán Thành công.
+     *
+     * @param customerId
+     * @return Hiện thông báo thành công để quay lại trang chủ.
+     */
+    @GetMapping(value = "/customer/show-bill", params = {"paid"})
+    public ModelAndView notifySuccessStatus(@RequestParam("customerId") Integer customerId) {
+
+        ModelAndView mav = new ModelAndView("xac-nhan-thanh-toan");
+        mav.addObject("customerId", customerId);
+
+        return mav;
     }
 
 }

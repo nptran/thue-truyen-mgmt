@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface BillService {
 
-    Bill createBillInfo(List<RentedBook> rentedBooks, Integer staffId);
+    Bill createPayInfo(List<RentedBook> rentedBooks, Integer staffId);
 
     boolean saveBillInfo(Bill bill);
 

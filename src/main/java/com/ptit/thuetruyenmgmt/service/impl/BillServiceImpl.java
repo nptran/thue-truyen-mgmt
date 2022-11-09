@@ -1,5 +1,6 @@
 package com.ptit.thuetruyenmgmt.service.impl;
 
+import com.ptit.thuetruyenmgmt.exception.FailedToPayException;
 import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.*;
 import com.ptit.thuetruyenmgmt.model.request.RentedBookDTO;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +40,7 @@ public class BillServiceImpl implements BillService {
 
     @Override
     @Transactional
-    public Bill createBillInfo(List<RentedBook> rentedBooks, Integer staffId) {
+    public Bill createPayInfo(List<RentedBook> rentedBooks, Integer staffId) {
         Optional<Staff> staffOptional = staffRepository.findById(staffId);
         if (!staffOptional.isPresent()) {
             throw new NotFoundException(STAFF_RESOURCE);
@@ -61,18 +63,44 @@ public class BillServiceImpl implements BillService {
     }
 
     @Override
+    @Transactional
     public boolean saveBillInfo(Bill bill) {
-        return false;
+        repository.save(bill);
+        for (RentedBook paidBook: bill.getRentedBooks()) {
+            paidBook.setPaid(true);
+        }
+        return updateRentStatus(bill.getRentedBooks());
+    }
+
+
+    private boolean updateRentStatus(List<RentedBook> paidBooks) {
+        if (paidBooks == null || paidBooks.isEmpty()) {
+            throw new FailedToPayException("Không có Đầu truyện nào để thanh toán");
+        }
+        // Kiểm tra sự tồn tại trong CSDL
+        for (RentedBook paidBook : paidBooks) {
+            int id = paidBook.getId();
+            Optional<RentedBook> optional = rentedBookRepository.findById(id);
+            if (!optional.isPresent()) {
+                throw new FailedToPayException("Đầu truyện ID `" + id + "` không tồn tại.");
+            }
+        }
+        try {
+            rentedBookRepository.saveAllAndFlush(paidBooks);
+        } catch (Exception e) {
+            throw new FailedToPayException(e.getMessage());
+        }
+        return true;
     }
 
 
     private double calculateTotalAmount(RentedBook book, LocalDateTime now) {
-        double amount = 0;
+        double amount = book.getAmount();
         // Tính tổng số giờ đã mượn
         LocalDateTime rentedFrom = book.getRentedTime();
-        Duration totalTime = Duration.between(now, rentedFrom);
+        Duration totalTime = Duration.between(rentedFrom, now);
         long hours = totalTime.toHours();
-        amount *= (double) hours / 24;
+        amount *= (double) hours / 24; // Chia ra nhân với giá thuê theo ngày
 
         for (RentedBookPenalty p : book.getPenalties()) {
             amount += p.getFee();

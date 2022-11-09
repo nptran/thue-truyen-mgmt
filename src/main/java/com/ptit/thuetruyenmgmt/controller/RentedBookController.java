@@ -107,7 +107,6 @@ public class RentedBookController {
         List<RentedBook> selectedBooks = service.getRentedBooksById(ids);
 
         // Dựng giao diện tra-truyen
-//        redirect.addFlashAttribute("selectedBooks", selectedBooks); // Truyền ds truyện đang chọn sang dưới dạng attribute
         ModelAndView mav = new ModelAndView("tra-truyen");
 
         List<RentedBookDTO> selectedBookDtos = rentedBooksToRentedBookDTOs(selectedBooks);
@@ -162,7 +161,6 @@ public class RentedBookController {
                         .penalties(tmpPenalties)
                         .build();
 
-//        mav.addObject("returnableBookIds", selectedBookIds);
         mav.addObject("rentedBook", rentedBookDTO);
         mav.addObject("allPenalties", allAvailablePenalties);
         return mav;
