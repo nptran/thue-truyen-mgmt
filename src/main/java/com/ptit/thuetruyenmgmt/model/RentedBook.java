@@ -21,9 +21,12 @@ public class RentedBook implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column
     private double amount;
 
+    @Column
     private LocalDateTime rentedTime;
+
 
     /**
      * Map sang {@link java.util.List} {@link BookTitle#rentedBooks} trong {@link BookTitle}

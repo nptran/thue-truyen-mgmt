@@ -45,9 +45,9 @@
                     <th:block th:each="customer,iterStat : ${customers}">
                         <tr th:ondblclick="|window.location.href='/customer/rented-books=${customer.id}'|">
                             <td th:text="${iterStat.count}"></td>
-                            <td th:text="${customer.fullName.toString()}"></td>
+                            <td th:text="${customer.fullName}"></td>
                             <td th:text="${customer.cccd}"></td>
-                            <td th:text="${customer.address.toString()}"></td>
+                            <td th:text="${customer.address}"></td>
                             <td th:text="${customer.dob}"></td>
                             <td th:text="${customer.phone}"></td>
                             <td th:text="${customer.email}"></td>

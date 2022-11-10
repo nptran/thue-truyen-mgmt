@@ -8,7 +8,7 @@ public class StaffController {
 
     @RequestMapping(path= {"/", "home"})
     public String home() {
-        return "home";
+        return "gd-chinh-nv";
     }
 
 }

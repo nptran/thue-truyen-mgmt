@@ -25,7 +25,6 @@ public class Bill implements Serializable {
     private double totalAmount;
 
     @Column
-    @CreatedDate
     private LocalDateTime createTime;
 
     /**

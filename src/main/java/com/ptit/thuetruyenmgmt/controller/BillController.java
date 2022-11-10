@@ -3,15 +3,11 @@ package com.ptit.thuetruyenmgmt.controller;
 import com.ptit.thuetruyenmgmt.model.Bill;
 import com.ptit.thuetruyenmgmt.model.Customer;
 import com.ptit.thuetruyenmgmt.model.RentedBook;
-import com.ptit.thuetruyenmgmt.model.request.ReadyToReturnBooks;
-import com.ptit.thuetruyenmgmt.model.request.RentedBookDTO;
-import com.ptit.thuetruyenmgmt.model.request.ReturnRentedBookRequest;
 import com.ptit.thuetruyenmgmt.service.BillService;
 import com.ptit.thuetruyenmgmt.service.CustomerService;
 import com.ptit.thuetruyenmgmt.service.RentedBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -19,8 +15,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Controller
 public class BillController {
@@ -79,7 +73,7 @@ public class BillController {
         List<RentedBook> rentedBooks = rentedBookService.getRentedBooksById(bookIds);
         Bill billInfo = service.createPayInfo(rentedBooks, 1);
 
-        ModelAndView mav = new ModelAndView("xac-nhan-thanh-toan");
+        ModelAndView mav = new ModelAndView("gd-xac-nhan-thanh-toan");
         mav.addObject("customerId", customerId);
         mav.addObject("customerInfo", customer);
         mav.addObject("paySuccess", false);
@@ -128,7 +122,7 @@ public class BillController {
     @GetMapping(value = "/customer/show-bill", params = {"paid"})
     public ModelAndView notifySuccessStatus(@RequestParam("customerId") Integer customerId) {
 
-        ModelAndView mav = new ModelAndView("xac-nhan-thanh-toan");
+        ModelAndView mav = new ModelAndView("gd-xac-nhan-thanh-toan");
         mav.addObject("customerId", customerId);
 
         return mav;
