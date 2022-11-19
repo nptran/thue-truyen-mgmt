@@ -14,7 +14,6 @@ import java.util.List;
 @Controller
 public class CustomerController {
 
-//    @Autowired
     private CustomerService service;
 
     @Autowired
@@ -32,9 +31,11 @@ public class CustomerController {
     public ModelAndView searchCustomer(@RequestParam(name = "kw-name", defaultValue = "", required = false) String customerName,
                                        HttpSession session) {
         ModelAndView mav = new ModelAndView("gd-tim-kh");
+        mav.addObject("kwName", customerName);
+        session.setAttribute("kwName", customerName);
+
         List<Customer> foundCustomers = service.getCustomerByName(customerName);
         mav.addObject("customers", foundCustomers);
-        session.setAttribute("kw-name", customerName);
 
         return mav;
     }

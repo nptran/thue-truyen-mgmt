@@ -13,8 +13,8 @@
             <form class="form-inline pull-right" action="#"
                   th:action="@{/customer/search}" method="GET">
                 <div class="form-group">
-                    <input type="text" class="form-control" name="kw-name"
-                           placeholder="Nhập tên để tìm..."/>
+                    <input type="text" class="form-control" name="kw-name" th:value="${kwName}"
+                           placeholder="Nhập tên để tìm..." th:autofocus="autofocus"/>
                 </div>
                 <button type="submit" class="btn btn-success">Tìm</button>
             </form>
@@ -51,10 +51,6 @@
                             <td th:text="${customer.dob}"></td>
                             <td th:text="${customer.phone}"></td>
                             <td th:text="${customer.email}"></td>
-                            <td><a th:href="@{/customer/rented-books={id}(id=${customer.id})}"><span
-                                    class="glyphicon glyphicon-pencil"></span></a></td>
-                            <!--            <td><a th:href="@{/student/{id}/delete(id=${customer.id})}"><span-->
-                            <!--                    class="glyphicon glyphicon-trash"></span></a></td>-->
                         </tr>
                     </th:block>
 
