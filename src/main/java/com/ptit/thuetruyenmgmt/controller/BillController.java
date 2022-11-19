@@ -19,14 +19,18 @@ import java.util.List;
 @Controller
 public class BillController {
 
-    @Autowired
     private BillService service;
 
-    @Autowired
     private CustomerService customerService;
 
-    @Autowired
     private RentedBookService rentedBookService;
+
+    @Autowired
+    public BillController(BillService billService, CustomerService customerService, RentedBookService rentedBookService) {
+        this.service = billService;
+        this.customerService = customerService;
+        this.rentedBookService = rentedBookService;
+    }
 
 
     /**
@@ -44,7 +48,7 @@ public class BillController {
 
         List<Integer> ids = (List<Integer>) session.getAttribute("selectedBookIds");
         if (ids == null || ids.isEmpty()) {
-            redirect.addFlashAttribute("invalidBill",
+            redirect.addFlashAttribute("returnNothing",
                     "Tạo thanh toán thất bại!!! Không có đầu truyện nào được chọn.");
             return new ModelAndView("redirect:/customer/rented-books=" + customerId);
         }
@@ -66,11 +70,24 @@ public class BillController {
     public ModelAndView generateBillInfo(@RequestParam("customerId") Integer customerId,
                                          HttpSession session,
                                          RedirectAttributes redirect) {
+
         // Xử lý tạo thông tin hoá đơn
         Customer customer = customerService.getCustomerById(customerId);
+
+        // Kiểm tra đầu truyện đã chọn
         List<Integer> bookIds = (List<Integer>) session.getAttribute("selectedBookIds");
+        if (bookIds == null || bookIds.isEmpty()) {
+            redirect.addFlashAttribute("returnNothing",
+                    "Tạo thanh toán thất bại!!! Không có đầu truyện nào được chọn.");
+            return new ModelAndView("redirect:/customer/rented-books=" + customerId);
+        }
 
         List<RentedBook> rentedBooks = rentedBookService.getRentedBooksById(bookIds);
+        if (rentedBooks == null || rentedBooks.isEmpty()) {
+            redirect.addFlashAttribute("returnNothing",
+                    "Tạo thanh toán thất bại!!! Không có đầu truyện nào được chọn.");
+            return new ModelAndView("redirect:/customer/rented-books=" + customerId);
+        }
         Bill billInfo = service.createPayInfo(rentedBooks, 1);
 
         ModelAndView mav = new ModelAndView("gd-xac-nhan-thanh-toan");
@@ -99,8 +116,8 @@ public class BillController {
                                 RedirectAttributes redirect) {
         Customer customer = customerService.getCustomerById(customerId);
         if (!service.saveBillInfo(bill)) {
-            redirect.addFlashAttribute("invalidBill",
-                    "Tạo thanh toán thất bại!!! Không có đầu truyện nào được chọn.");
+            redirect.addFlashAttribute("returnNothing",
+                    "Tạo thanh toán thất bại!!!");
             return new ModelAndView("redirect:/customer/rented-books=" + customerId);
         }
 
@@ -120,11 +137,14 @@ public class BillController {
      * @return Hiện thông báo thành công để quay lại trang chủ.
      */
     @GetMapping(value = "/customer/show-bill", params = {"paid"})
-    public ModelAndView notifySuccessStatus(@RequestParam("customerId") Integer customerId) {
-
+    public ModelAndView notifySuccessStatus(@RequestParam("customerId") Integer customerId,
+                                            @RequestParam(name = "paid") boolean paidStatus,
+                                            RedirectAttributes redirect) {
+        if (!paidStatus) { // Check đúng luồng khi ở payBill
+            return new ModelAndView("redirect:/customer/rented-books=" + customerId);
+        }
         ModelAndView mav = new ModelAndView("gd-xac-nhan-thanh-toan");
         mav.addObject("customerId", customerId);
-
         return mav;
     }
 
