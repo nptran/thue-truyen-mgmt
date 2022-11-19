@@ -23,13 +23,17 @@
                 <a th:href="@{/customer/rented-books={id}(id=*{customerId})}" class="btn btn-warning pull-left">
                     <span class="fas fa-backward"></span> Quay Lại
                 </a>
-                <button type="submit" class="btn btn-success">Thanh Toán</button>
+                <button type="submit" class="btn btn-success pull-right">Thanh Toán</button>
             </div>
 
             <!-- BẢNG DS ĐẦU TRUYỆN ĐANG MƯỢN -->
             <!-- NẾU KẾT QUẢ TRỐNG -->
             <th:block th:if="${#lists.isEmpty(returnBookReq.rentedBookDtos)}">
-                <h3>Danh sách trống! Khách hàng đang không mượn truyện nào!</h3>
+                <h3>Chưa có Đầu Truyện nào được chọn! Hãy
+                    <a th:href="@{/customer/rented-books={id}(id=*{customerId})}">
+                        quay lại và chọn truyện cần trả
+                    </a> trước đã!
+                </h3>
             </th:block>
             <th:block th:if="${#lists.isEmpty(allPenalties)}">
                 <h3>Danh sách Lỗi truyện trống! Thêm ngay!</h3>

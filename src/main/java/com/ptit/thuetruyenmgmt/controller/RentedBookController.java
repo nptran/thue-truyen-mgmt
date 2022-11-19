@@ -29,11 +29,15 @@ public class RentedBookController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RentedBookController.class);
 
-    @Autowired
     private RentedBookService service;
 
-    @Autowired
     private PenaltyService penaltyService;
+
+    @Autowired
+    public RentedBookController(RentedBookService rentedBookService, PenaltyService penaltyService) {
+        this.service = rentedBookService;
+        this.penaltyService = penaltyService;
+    }
 
 
     /**
@@ -48,7 +52,7 @@ public class RentedBookController {
         List<RentedBook> allRentedBooks = service.getRentedBooksByCustomer(id);
         ReadyToReturnBooks wrapper = new ReadyToReturnBooks();
         wrapper.setCustomerId(id);
-        String searchKw = (String) session.getAttribute("kw-name");
+        String searchKw = (String) session.getAttribute("kwName");
         mav.addObject("searchKw", searchKw);
         mav.addObject("selectedBooks", wrapper);
         mav.addObject("allRentedBooks", allRentedBooks);
