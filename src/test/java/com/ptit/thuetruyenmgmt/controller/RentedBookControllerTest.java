@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import java.time.LocalDateTime;
@@ -45,7 +46,10 @@ public class RentedBookControllerTest {
     private MockMvc mvc;
 
     /**
-     * @POSITIVE: Khi NV chọn KH id 1 từ GD tìm kiếm tên Minh và KH đang có 3 truyện cần mượn.
+     * {@link RentedBookController#getGDRentedBooks(Integer, HttpSession)}: Test Case 1
+     *
+     * @POSITIVE: KH được chọn có đầu truyện đang mượn (3).
+     * → Trả về thông tin các đầu truyện đang mượn
      */
     @Test
     void whenGetGDRentedBooks_thenReturn200AndDSTruyen() throws Exception {
@@ -67,27 +71,27 @@ public class RentedBookControllerTest {
         when(service.getRentedBooksByCustomer(c1.getId())).thenReturn(books);
         this.mvc.perform(
                         get("/customer/rented-books={id}", c1.getId())
-                                .sessionAttr("kw-name", kw)) // Mock giá trị cho session
+                                .sessionAttr("kwName", kw)) // Mock giá trị cho session
                 .andExpect(status().isOk())
-                .andExpect(view().name("ds-truyen-kh"))
+                .andExpect(view().name("gd-truyen-kh"))
                 .andExpect(model().attribute("searchKw", kw))
                 .andExpect(model().attribute("allRentedBooks", hasSize(3))) // Có 3 đầu truyện mượn
                 .andExpect(model().attribute("allRentedBooks", hasItem(
                         allOf(
-                                hasProperty("id", Matchers.is(b1.getId()))
-//                                hasProperty("fullName", Matchers.hasToString(c1.getFullName().toString()))
+                                hasProperty("id", Matchers.is(b1.getId())), // Đúng đầu truyện cần lấy
+                                hasProperty("customer", Matchers.is(c1))    // Đầu truyện của đúng KH
                         )
                 )))
                 .andExpect(model().attribute("allRentedBooks", hasItem(
                         allOf(
-                                hasProperty("id", Matchers.is(b2.getId()))
-//                                hasProperty("fullName", Matchers.hasToString(c1.getFullName().toString()))
+                                hasProperty("id", Matchers.is(b2.getId())), // Đúng đầu truyện cần lấy
+                                hasProperty("customer", Matchers.is(c1))    // Đầu truyện của đúng KH
                         )
                 )))
                 .andExpect(model().attribute("allRentedBooks", hasItem(
                         allOf(
-                                hasProperty("id", Matchers.is(b3.getId()))
-//                                hasProperty("fullName", Matchers.hasToString(c2.getFullName().toString()))
+                                hasProperty("id", Matchers.is(b3.getId())), // Đúng đầu truyện cần lấy
+                                hasProperty("customer", Matchers.is(c1))    // Đầu truyện của đúng KH
                         )
                 )))
                 .andExpect(model().attribute("selectedBooks", selected));
@@ -96,8 +100,39 @@ public class RentedBookControllerTest {
         verifyNoMoreInteractions(service);
     }
 
+
     /**
-     * @POSITIVE: Khi NV chọn 2 truyện và nhấn trả truyện
+     * {@link RentedBookController#getGDRentedBooks(Integer, HttpSession)}: Test Case 2
+     *
+     * @NEGATIVE: KH được chọn không có đầu truyện nào đang mượn (3).
+     * → Không có thông tin các đầu truyện đang mượn
+     */
+    @Test
+    void whenGetGDRentedBooks_thenReturn204AndDSTruyenRong() throws Exception {
+        String kw = "Minh"; // Tìm từ KH tên Minh
+        // KH 1 có 3 đầu truyện đang mượn
+        Customer c1 = Customer.builder().id(1).fullName(new FullName(1, "Minh", "Phạm")).build();
+        List<RentedBook> books = new ArrayList<>();
+
+        when(service.getRentedBooksByCustomer(c1.getId())).thenReturn(books);
+        this.mvc.perform(
+                        get("/customer/rented-books={id}", c1.getId())
+                                .sessionAttr("kwName", kw)) // Mock giá trị cho session
+                .andExpect(status().isNoContent()) // 204
+                .andExpect(view().name("gd-truyen-kh"))
+                .andExpect(model().attribute("searchKw", kw))
+                .andExpect(model().attribute("allRentedBooks", hasSize(0))); // DS đầu truyện mượn rỗng
+
+        verify(service, times(1)).getRentedBooksByCustomer(c1.getId());
+        verifyNoMoreInteractions(service);
+    }
+
+
+    /**
+     * {@link RentedBookController#checkSelectedReturnBooks(Integer, ReadyToReturnBooks, HttpSession, RedirectAttributes)}: Test Case 1
+     *
+     * @POSITIVE: Có Truyện được chọn để trả (2)
+     * → Chuyển tiếp tới trang gd-tra-truyen
      */
     @Test
     void whenCheckSelectedReturnBooksAndGetGDTraTruyen_thenRedirectToTraTruyen() throws Exception {
@@ -119,17 +154,50 @@ public class RentedBookControllerTest {
 
     }
 
+
     /**
-     * @POSITIVE: Sau khi hệ thống kiểm tra có truyện được chọn, hiển thị tra-truyen
+     * {@link RentedBookController#checkSelectedReturnBooks(Integer, ReadyToReturnBooks, HttpSession, RedirectAttributes)}: Test Case 2
+     *
+     * @NEGATIVE: Không có Truyện nào được chọn để trả
+     * → Chuyển về trang gd-truyen-kh
      */
     @Test
-    void whenGetGDTraTruyen_thenReturn200AndTraTruyenView() throws Exception {
-        // 2 truyện được chọn để trả
+    void whenCheckSelectedReturnBooksAndGetGDTraTruyen_thenRedirectToDSTruyenKH() throws Exception {
+        // 0 truyện được chọn để trả
         Customer c1 = Customer.builder().id(1).fullName(new FullName(1, "Minh", "Phạm")).build();
+        List<RentedBook> books = new ArrayList<>();
+        ReadyToReturnBooks selectedBooks = ReadyToReturnBooks.builder().customerId(c1.getId()).willBeReturnedBooks(books).build();
+
+        this.mvc.perform(
+                        post("/rented-book/selectToReturn-of={id}", c1.getId())
+                                .flashAttr("selectedBooks", selectedBooks)) // Mock ds chọn
+                // Mong đợi chuyển hướng
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/customer/rented-books=" + c1.getId()));
+
+    }
+
+
+    /**
+     * {@link RentedBookController#getGDTraTruyen(Integer, HttpSession)}: Test Case 1
+     *
+     * @POSITIVE: Có truyện được chọn, có truyện tồn tại, có truyện có lỗi
+     * → Hiển thị được gd, ds truyện được chọn và tồn tại, các lỗi đi kèm
+     */
+    @Test
+    void whenGetGDTraTruyen_case1() throws Exception {
+        // 2 truyện được chọn để trả, có lỗi
+        Customer c1 = Customer.builder().id(1).fullName(new FullName(1, "Minh", "Phạm")).build();
+        RentedBookPenalty p1 = RentedBookPenalty.builder().id(new RentedBookPenaltyKey(1, 1)).fee(1000).build();
+        RentedBookPenalty p2 = RentedBookPenalty.builder().id(new RentedBookPenaltyKey(1, 2)).fee(2300).build();
+        List<RentedBookPenalty> penaltiesOfBook1 = new ArrayList<>();
+        penaltiesOfBook1.add(p1);
+        penaltiesOfBook1.add(p2);
         RentedBook b1 = RentedBook.builder()
                 .id(1)
                 .bookTitle(BookTitle.builder().titleName("").code("").build())
                 .rentedTime(LocalDateTime.of(2022, 10, 10, 10, 10))
+                .penalties(penaltiesOfBook1)
                 .amount(1000).customer(c1).build();
         RentedBook b2 = RentedBook.builder()
                 .id(2)
@@ -155,12 +223,152 @@ public class RentedBookControllerTest {
                         get("/rented-book/selected-of={id}", c1.getId())
                                 .sessionAttr("selectedBookIds", ids)) // Mock ds chọn vào session
                 .andExpect(status().isOk())
-                .andExpect(view().name("tra-truyen"))
+                .andExpect(view().name("gd-tra-truyen"))   // Đúng giao diện
                 .andExpect(model().attribute("returnBookReq", instanceOf(ReturnRentedBookRequest.class)))
+                .andExpect(model().attribute("returnBookReq",
+                        hasProperty("customerId", is(c1.getId()))   // Đúng KH
+                ))
+                .andExpect(model().attribute("returnBookReq",
+                        hasProperty("rentedBookDtos", is(selectedBookDtos)) // Đúng DS Truyện
+                ))
                 .andExpect(model().attribute("allPenalties", is(allPenalties)));
 
         verify(service, times(1)).getRentedBooksById(ids);
         verify(penaltyService, times(1)).getAllPenalties();
+
+        verifyNoMoreInteractions(service);
+        verifyNoMoreInteractions(penaltyService);
+    }
+
+
+    /**
+     * {@link RentedBookController#getGDTraTruyen(Integer, HttpSession)}: Test Case 2
+     *
+     * @POSITIVE: Có truyện được chọn, có truyện tồn tại, không truyện nào có lỗi
+     * → Hiển thị được gd, ds truyện được chọn và tồn tại
+     */
+    @Test
+    void whenGetGDTraTruyen_case2() throws Exception {
+        // 2 truyện được chọn để trả không có lỗi
+        Customer c1 = Customer.builder().id(1).fullName(new FullName(1, "Minh", "Phạm")).build();
+        RentedBook b1 = RentedBook.builder()
+                .id(1)
+                .bookTitle(BookTitle.builder().titleName("").code("").build())
+                .rentedTime(LocalDateTime.of(2022, 10, 10, 10, 10))
+                .amount(1000).customer(c1).build();
+        RentedBook b2 = RentedBook.builder()
+                .id(2)
+                .bookTitle(BookTitle.builder().titleName("").code("").build())
+                .rentedTime(LocalDateTime.of(2022, 10, 10, 10, 10))
+                .amount(2000).customer(c1).build();
+        List<RentedBook> selectedBooks = new ArrayList<>();
+        selectedBooks.add(b1);
+        selectedBooks.add(b2);
+        List<Integer> ids = new ArrayList<>();
+        ids.add(b1.getId());
+        ids.add(b2.getId());
+        List<RentedBookDTO> selectedBookDtos = rentedBooksToRentedBookDTOs(selectedBooks);
+
+        // Mock 4 penalties
+        List<Penalty> allPenalties = getListOfPenalties(1, 4, 1000);
+        when(service.getRentedBooksById(ids)).thenReturn(selectedBooks);
+        when(penaltyService.getAllPenalties()).thenReturn(allPenalties);
+
+        this.mvc.perform(
+                        get("/rented-book/selected-of={id}", c1.getId())
+                                .sessionAttr("selectedBookIds", ids)) // Mock ds chọn vào session
+                .andExpect(status().isOk())
+                .andExpect(view().name("gd-tra-truyen"))   // Đúng giao diện
+                .andExpect(model().attribute("returnBookReq", instanceOf(ReturnRentedBookRequest.class)))
+                .andExpect(model().attribute("returnBookReq",
+                        hasProperty("customerId", is(c1.getId()))   // Đúng KH
+                ))
+                .andExpect(model().attribute("returnBookReq",
+                        hasProperty("rentedBookDtos", is(selectedBookDtos)) // Đúng DS Truyện
+                ))
+                .andExpect(model().attribute("allPenalties", is(allPenalties)));
+
+        verify(service, times(1)).getRentedBooksById(ids);
+        verify(penaltyService, times(1)).getAllPenalties();
+
+        verifyNoMoreInteractions(service);
+        verifyNoMoreInteractions(penaltyService);
+    }
+
+
+    /**
+     * {@link RentedBookController#getGDTraTruyen(Integer, HttpSession)}: Test Case 3
+     *
+     * @NEGATIVE: Có truyện được chọn, nhưng tất cả đều không tồn tại/đang mượn
+     * → Hiển thị được gd, ds truyện được chọn rỗng
+     */
+    @Test
+    void whenGetGDTraTruyen_case3() throws Exception {
+        Customer c1 = Customer.builder().id(1).fullName(new FullName(1, "Minh", "Phạm")).build();
+        // Có 2 truyện được chọn
+        List<Integer> ids = new ArrayList<>();
+        ids.add(1);
+        ids.add(2);
+
+        // Mock 4 penalties
+        List<Penalty> allPenalties = getListOfPenalties(1, 4, 1000);
+        when(service.getRentedBooksById(ids)).thenReturn(new ArrayList<>()); // Nhưng DS truyện được trả về từ Service là rỗng
+        when(penaltyService.getAllPenalties()).thenReturn(allPenalties);
+
+        this.mvc.perform(
+                        get("/rented-book/selected-of={id}", c1.getId())
+                                .sessionAttr("selectedBookIds", ids)) // Mock ds chọn vào session
+                .andExpect(status().isNoContent())  // 204
+                .andExpect(view().name("gd-tra-truyen"))   // Kiểm tra giao diện
+                .andExpect(model().attribute("returnBookReq", instanceOf(ReturnRentedBookRequest.class)))
+                .andExpect(model().attribute("returnBookReq",
+                        hasProperty("customerId", is(c1.getId()))   // Kiểm tra KH
+                ))
+                .andExpect(model().attribute("returnBookReq",
+                        hasProperty("rentedBookDtos", emptyCollectionOf(RentedBookDTO.class)) // Kiểm tra DS Truyện
+                ))
+                .andExpect(model().attribute("allPenalties", is(allPenalties)));
+
+        verify(service, times(1)).getRentedBooksById(ids);
+        verify(penaltyService, times(1)).getAllPenalties();
+
+        verifyNoMoreInteractions(service);
+        verifyNoMoreInteractions(penaltyService);
+    }
+
+
+    /**
+     * {@link RentedBookController#getGDTraTruyen(Integer, HttpSession)}: Test Case 3
+     *
+     * @NEGATIVE: Không có truyện được chọn (Khi NV truy cập trực tiếp bằng URL)
+     * → Hiển thị được gd, ds truyện được chọn rỗng
+     */
+    @Test
+    void whenGetGDTraTruyen_case4() throws Exception {
+        Customer c1 = Customer.builder().id(1).fullName(new FullName(1, "Minh", "Phạm")).build();
+        // Mock 4 penalties
+        List<Penalty> allPenalties = getListOfPenalties(1, 4, 1000);
+        when(service.getRentedBooksById(null)).thenReturn(new ArrayList<>()); // Không có ids
+        when(penaltyService.getAllPenalties()).thenReturn(allPenalties);
+
+        this.mvc.perform(
+                        get("/rented-book/selected-of={id}", c1.getId()))
+                .andExpect(status().isNoContent())  // 204
+                .andExpect(view().name("gd-tra-truyen"))   // Kiểm tra giao diện
+                .andExpect(model().attribute("returnBookReq", instanceOf(ReturnRentedBookRequest.class)))
+                .andExpect(model().attribute("returnBookReq",
+                        hasProperty("customerId", is(c1.getId()))   // Kiểm tra KH
+                ))
+                .andExpect(model().attribute("returnBookReq",
+                        hasProperty("rentedBookDtos", emptyCollectionOf(RentedBookDTO.class)) // Kiểm tra DS Truyện
+                ))
+                .andExpect(model().attribute("allPenalties", is(allPenalties)));
+
+        verify(service, times(1)).getRentedBooksById(null);
+        verify(penaltyService, times(1)).getAllPenalties();
+
+        verifyNoMoreInteractions(service);
+        verifyNoMoreInteractions(penaltyService);
     }
 
 
@@ -200,13 +408,16 @@ public class RentedBookControllerTest {
         this.mvc.perform(
                         get("/rented-book/{id}/penalties", book.getId())) // Đầu truyện mã 1
                 .andExpect(status().isOk())
-                .andExpect(view().name("cap-nhat-loi-truyen"))  // Mong đợi trả về gd này
+                .andExpect(view().name("gd-cap-nhat-loi-truyen"))  // Mong đợi trả về gd này
                 .andExpect(model().attribute("rentedBook", is(expectedDto)))
                 .andExpect(model().attribute("allPenalties", is(allAvailablePenalties)));
 
         verify(service, times(1)).getRentedBookById(book.getId());
         verify(service, times(1)).rentedBookPenaltiesToPenalties(book.getPenalties());
         verify(penaltyService, times(1)).getAllPenalties();
+
+        verifyNoMoreInteractions(service);
+        verifyNoMoreInteractions(penaltyService);
     }
 
 

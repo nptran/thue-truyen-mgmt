@@ -1,5 +1,6 @@
 package com.ptit.thuetruyenmgmt.controller;
 
+import com.ptit.thuetruyenmgmt.exception.EmptyResultException;
 import com.ptit.thuetruyenmgmt.model.Penalty;
 import com.ptit.thuetruyenmgmt.model.RentedBook;
 import com.ptit.thuetruyenmgmt.model.RentedBookPenalty;
@@ -12,6 +13,7 @@ import com.ptit.thuetruyenmgmt.service.RentedBookService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -50,6 +52,7 @@ public class RentedBookController {
     public ModelAndView getGDRentedBooks(@PathVariable Integer id, HttpSession session) {
         ModelAndView mav = new ModelAndView("gd-truyen-kh");
         List<RentedBook> allRentedBooks = service.getRentedBooksByCustomer(id);
+        if (allRentedBooks.isEmpty()) mav.setStatus(HttpStatus.NO_CONTENT);
         ReadyToReturnBooks wrapper = new ReadyToReturnBooks();
         wrapper.setCustomerId(id);
         String searchKw = (String) session.getAttribute("kwName");
@@ -70,10 +73,10 @@ public class RentedBookController {
      * @return `tra-truyen`
      */
     @PostMapping(value = "/rented-book/selectToReturn-of={id}")
-    public ModelAndView checkSelectedReturnBooksAndGetGDTraTruyen(@PathVariable("id") Integer customerId,
-                                                                  @ModelAttribute("selectedBooks") ReadyToReturnBooks selectedBooks,
-                                                                  HttpSession session,
-                                                                  RedirectAttributes redirect) {
+    public ModelAndView checkSelectedReturnBooks(@PathVariable("id") Integer customerId,
+                                                 @ModelAttribute("selectedBooks") ReadyToReturnBooks selectedBooks,
+                                                 HttpSession session,
+                                                 RedirectAttributes redirect) {
         List<RentedBook> books = selectedBooks.getWillBeReturnedBooks();
         if (books.isEmpty()) {
             redirect.addFlashAttribute("returnNothing", "Hãy chọn ít nhất 1 đầu truyện để trả!");
@@ -101,13 +104,14 @@ public class RentedBookController {
     @GetMapping(value = "/rented-book/selected-of={id}")
     public ModelAndView getGDTraTruyen(@PathVariable("id") Integer customerId,
                                        HttpSession session) {
+        ModelAndView mav = new ModelAndView("gd-tra-truyen");
+
         // Lấy ra danh sách các truyện đã chọn từ session
         List<Integer> ids = (List<Integer>) session.getAttribute("selectedBookIds");
         List<RentedBook> selectedBooks = service.getRentedBooksById(ids);
+        if (selectedBooks.isEmpty()) mav.setStatus(HttpStatus.NO_CONTENT);
 
         // Dựng giao diện tra-truyen
-        ModelAndView mav = new ModelAndView("gd-tra-truyen");
-
         List<RentedBookDTO> selectedBookDtos = rentedBooksToRentedBookDTOs(selectedBooks);
         mav.addObject("returnBookReq", new ReturnRentedBookRequest(customerId, selectedBookDtos));
         mav.addObject("allPenalties", penaltyService.getAllPenalties());
