@@ -6,63 +6,93 @@
     <nav th:replace="fragments/layout :: header"></nav>
 
     <div class="hero form" style="margin:auto;">
-        <div class="row">
-            <h3>Cập Nhật Lỗi Truyện cho Đầu Truyện </h3>
-            <p th:text="'Tên Đầu Truyện: ' + ${rentedBook.titleName}"></p>
-            <p th:text="'Mã Đầu Truyện: ' + ${rentedBook.code}"></p>
-            <div th:if="${failedMessage}" class="row alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert"
-                        aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-                <span th:text="${failedMessage}"></span>
+        <th:block th:unless="${rentedBook}">
+            <div class="row">
+                <script type="text/javascript">
+                    window.onload = function () {
+                        alert("Đầu truyện không còn tồn tại hoặc đã được thanh toán! Chuyển hướng về Trang chủ.")
+                        window.location = "http://localhost:9000/";
+                    };
+                </script>
+                <h3>Đầu truyện không còn tồn tại hoặc đã được thanh toán!</h3>
             </div>
+        </th:block>
 
-            <form action="#" th:action="@{/rented-book/{id}/save-penalties(id=*{rentedBookId})}" th:object="${rentedBook}"
-                  method="POST" novalidate="novalidate">
-                <input type="hidden" th:field="*{rentedBookId}"/>
-                <div class="row">
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                        <tr>
-                            <th>Chọn Lỗi Truyện</th>
-                            <th>Nhập Phí Phạt</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="penalty, stat : ${allPenalties}">
-                            <td>
-                                <div class="form-group">
-                                    <label>Chọn Lỗi Truyện</label>
-                                    <input type="checkbox" class="form-control"
-                                           th:value="${penalty.id}"
-                                           th:text="${penalty.id + '. ' + penalty.name+': '+penalty.description}"
-                                           th:field="*{penalties[__${stat.index}__].id}"
-                                    />
-                                    <!--                    <span class="label label-danger" th:if="${#fields.hasErrors('penalties')}" th:errors="*{penalties}">Có Lỗi Khi Chọn Lỗi Truyện</span>-->
-                                </div>
-                            </td>
-                            <td>
-                                <div class="form-group">
-                                    <label>Nhập Phí Phạt</label>
-                                    <input type="number" class="form-control"
-                                           th:value="${penalty.recommendedFee}"
-                                           th:text="${'Mức phạt Đề xuất: '+penalty.recommendedFee}"
-                                           th:field="*{penalties[__${stat.index}__].recommendedFee}"
-                                    />
-                                    <!--                    <span class="label label-danger" th:if="${#fields.hasErrors('penalties')}" th:errors="*{penalties}">Có Lỗi Khi Nhập Phí Phạt</span>-->
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+        <!-- NẾU ĐẦU TRUYỆN TỒN TẠI -->
+        <th:block th:if="${rentedBook}">
+            <div class="row">
+                <h3>Cập Nhật Lỗi Truyện cho Đầu Truyện </h3>
+                <p th:text="'Tên Đầu Truyện: ' + ${rentedBook.titleName}"></p>
+                <p th:text="'Mã Đầu Truyện: ' + ${rentedBook.code}"></p>
+                <div th:if="${failedMessage}" class="row alert alert-danger alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert"
+                            aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                    <span th:text="${failedMessage}"></span>
                 </div>
-                <button type="submit" class="btn btn-primary pull-right" style="margin-right:0px">Lưu</button>
-                <a th:href="@{/rented-book/selected-of={id}(id=*{customerId})}" class="btn btn-primary pull-left" style="margin-right:0px">
-                    <span class="fas fa-backward"></span> Quay Lại
-                </a>
-            </form>
-        </div><!-- /.container -->
+
+                <form action="#" th:action="@{/rented-book/{id}/save-penalties(id=*{rentedBookId})}"
+                      th:object="${rentedBook}"
+                      method="POST" novalidate="novalidate">
+                    <input type="hidden" th:field="*{rentedBookId}"/>
+                    <th:block th:if="${#lists.isEmpty(allPenalties)}">
+                        <div class="row">
+                            <script type="text/javascript">
+                                window.onload = function () {
+                                    alert("Hiện chưa có lỗi truyện nào được Quy định! Liên hệ với Quản lý của bạn và thử lại!");
+                                };
+                            </script>
+                            <h3>Hiện chưa có lỗi truyện nào được Quy định!</h3>
+                        </div>
+                    </th:block>
+                    <th:block th:unless="${#lists.isEmpty(allPenalties)}">
+                        <div class="row">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Chọn Lỗi Truyện</th>
+                                    <th>Nhập Phí Phạt</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="penalty, stat : ${allPenalties}">
+                                    <td>
+                                        <div class="form-group">
+                                            <label>Chọn Lỗi Truyện</label>
+                                            <input type="checkbox" class="form-control"
+                                                   th:value="${penalty.id}"
+                                                   th:text="${penalty.id + '. ' + penalty.name+': '+penalty.description}"
+                                                   th:field="*{penalties[__${stat.index}__].id}"
+                                            />
+                                            <!--                    <span class="label label-danger" th:if="${#fields.hasErrors('penalties')}" th:errors="*{penalties}">Có Lỗi Khi Chọn Lỗi Truyện</span>-->
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group">
+                                            <label>Nhập Phí Phạt</label>
+                                            <input type="number" class="form-control"
+                                                   th:value="${penalty.recommendedFee}"
+                                                   th:text="${'Mức phạt Đề xuất: '+penalty.recommendedFee}"
+                                                   th:field="*{penalties[__${stat.index}__].recommendedFee}"
+                                            />
+                                            <!--                    <span class="label label-danger" th:if="${#fields.hasErrors('penalties')}" th:errors="*{penalties}">Có Lỗi Khi Nhập Phí Phạt</span>-->
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </th:block>
+                    <button type="submit" class="btn btn-primary pull-right" style="margin-right:0px">Lưu</button>
+                    <a th:href="@{/rented-book/selected-of={id}(id=*{customerId})}"
+                       class="btn btn-primary pull-left"
+                       style="margin-right:0px">
+                        <span class="fas fa-backward"></span> Quay Lại
+                    </a>
+                </form>
+            </div><!-- /.container -->
+        </th:block>
     </div><!-- /.hero -->
 </div><!-- /.header-nightsky -->
 

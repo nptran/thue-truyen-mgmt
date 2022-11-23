@@ -1,6 +1,7 @@
 package com.ptit.thuetruyenmgmt.controller;
 
 import com.ptit.thuetruyenmgmt.exception.EmptyResultException;
+import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.Penalty;
 import com.ptit.thuetruyenmgmt.model.RentedBook;
 import com.ptit.thuetruyenmgmt.model.RentedBookPenalty;
@@ -50,6 +51,7 @@ public class RentedBookController {
      */
     @GetMapping("/customer/rented-books={id}")
     public ModelAndView getGDRentedBooks(@PathVariable Integer id, HttpSession session) {
+        session.setAttribute("customerId", id);
         ModelAndView mav = new ModelAndView("gd-truyen-kh");
         List<RentedBook> allRentedBooks = service.getRentedBooksByCustomer(id);
         if (allRentedBooks.isEmpty()) mav.setStatus(HttpStatus.NO_CONTENT);
@@ -129,11 +131,20 @@ public class RentedBookController {
     @RequestMapping("/rented-book/{id}/penalties")
     public ModelAndView getGDCapNhatLoiTruyen(@PathVariable(name = "id") Integer bookId) {
         ModelAndView mav = new ModelAndView("gd-cap-nhat-loi-truyen");
-
-        RentedBook originalRentedBook = service.getRentedBookById(bookId);
+        RentedBook originalRentedBook;
+        try {
+            originalRentedBook = service.getRentedBookById(bookId);
+        } catch (NotFoundException e) {
+            mav.setStatus(HttpStatus.NOT_FOUND);
+            mav.addObject("rentedBook", null);
+            mav.addObject("allPenalties", null);
+            return mav;
+        }
         List<Penalty> currentPenalties = service.rentedBookPenaltiesToPenalties(originalRentedBook.getPenalties());
         List<Integer> currentPenaltiesIds = currentPenalties.stream().map(Penalty::getId).collect(Collectors.toList());
         List<Penalty> allAvailablePenalties = penaltyService.getAllPenalties();
+        if (allAvailablePenalties.isEmpty()) mav.setStatus(HttpStatus.NO_CONTENT);
+
         List<Penalty> tmpPenalties = new ArrayList<>();
         // Đặt lại ds penalty để chỉ tick những ô penalty hiện tại của originalRentedBook
         for (Penalty originalPenalty : allAvailablePenalties) {
@@ -223,8 +234,8 @@ public class RentedBookController {
         }
 
 
-        List<Integer> selectedBooks = (List<Integer>) session.getAttribute("selectedBookIds");
-        List<RentedBook> selectedRentedBooks = service.getRentedBooksById(selectedBooks);
+//        List<Integer> selectedBooks = (List<Integer>) session.getAttribute("selectedBookIds");
+//        List<RentedBook> selectedRentedBooks = service.getRentedBooksById(selectedBooks);
 
         // Nếu lưu thành công chuyển hướng về trang Trả truyện
         redirect.addFlashAttribute("savePenaltiesSuccess", "Cập nhật lỗi truyện thành công!");

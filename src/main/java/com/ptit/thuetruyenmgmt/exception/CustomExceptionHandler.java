@@ -15,15 +15,16 @@ import org.springframework.web.servlet.ModelAndView;
  * 
  * @see ErrorResponse
  */
-@ControllerAdvice
+@Deprecated
+//@ControllerAdvice
 public class CustomExceptionHandler {
 
-	@ExceptionHandler(Throwable.class)
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+//	@ExceptionHandler(Throwable.class)
+//	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public String exception(final Throwable throwable) {
 //		logger.error("Exception during execution of SpringSecurity application", throwable);
 		String errorMessage = (throwable != null ? throwable.getMessage() : "Unknown error");
 //		model.addAttribute("errorMessage", errorMessage);
-		return "error/error";
+		return "";
 	}
 }

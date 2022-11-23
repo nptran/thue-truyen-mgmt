@@ -21,7 +21,8 @@ public class PenaltyServiceImpl implements PenaltyService {
 
     @Override
     public List<Penalty> getAllPenalties() {
-        return repository.findAll();
+        List<Penalty> p = repository.findAll();
+        return p;
     }
 
     @Override
