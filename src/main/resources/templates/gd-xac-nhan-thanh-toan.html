@@ -8,13 +8,13 @@
         <div class="jumbotron">
             <h1 style="color: #313131;font-size: 30px;">Thông Tin Thanh Toán</h1>
             <p style="color: cadetblue;font-size: initial;"
-               th:text="${'Mã khách hàng: '+customerInfo.id}"></p><br>
+               th:text="${'Mã khách hàng: '+customerInfo?.id}"></p><br>
             <p style="color: cadetblue;font-size: initial;"
-               th:text="${'Tên khách hàng: '+customerInfo.fullName+' - SĐT: '+customerInfo.phone}"></p><br>
+               th:text="${'Tên khách hàng: '+customerInfo?.fullName+' - SĐT: '+customerInfo?.phone}"></p><br>
             <p style="color: cadetblue;font-size: initial;"
-               th:text="${'Địa chỉ: '+customerInfo.address}"></p><br>
+               th:text="${'Địa chỉ: '+customerInfo?.address}"></p><br>
             <p style="color: cadetblue;font-size: initial;"
-               th:text="${'Thời điểm thanh toán: '+bill.createTime}"></p><br>
+               th:text="${'Thời điểm thanh toán: '+bill?.createTime}"></p><br>
         </div>
 
         <th:block th:if="${paySuccess}">
@@ -78,21 +78,21 @@
                             <tbody>
                             <tr th:each="book,iterStat : *{rentedBooks}" class="form-group">
                                 <td th:text="${iterStat.count}"></td>
-                                <td th:text="${book.bookTitle.code}"></td>
-                                <td th:text="${book.bookTitle.titleName}"></td>
-                                <td th:text="${book.rentedTime}"></td>
-                                <td th:text="${book.amount+'đ'}"></td>
+                                <td th:text="${book?.bookTitle?.code}"></td>
+                                <td th:text="${book?.bookTitle?.titleName}"></td>
+                                <td th:text="${book?.rentedTime}"></td>
+                                <td th:text="${book?.amount+'đ'}"></td>
                                 <td>
                                     <ul class="list-group">
                                         <li class="list-group-item" th:each="p, stat : ${book.penalties}"
-                                            th:text="${p.penalty.name}">
+                                            th:text="${p?.penalty?.name}">
                                         </li>
                                     </ul>
                                 </td>
                                 <td>
                                     <ul class="list-group">
-                                        <li class="list-group-item" th:each="p, stat : ${book.penalties}"
-                                            th:text="${p.fee + 'đ'}">
+                                        <li class="list-group-item" th:each="p, stat : ${book?.penalties}"
+                                            th:text="${p?.fee + 'đ'}">
                                         </li>
                                     </ul>
                                 </td>

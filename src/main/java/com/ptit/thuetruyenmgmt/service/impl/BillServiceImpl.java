@@ -75,7 +75,7 @@ public class BillServiceImpl implements BillService {
         try {
             repository.save(bill);
         } catch (Exception e) {
-            throw new FailedToPayException("Không thể lưu thanh toán");
+            throw new FailedToPayException();
         }
         for (RentedBook paidBook: bill.getRentedBooks()) {
             paidBook.setPaid(true);

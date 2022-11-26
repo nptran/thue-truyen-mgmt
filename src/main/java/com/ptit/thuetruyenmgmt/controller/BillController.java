@@ -1,5 +1,6 @@
 package com.ptit.thuetruyenmgmt.controller;
 
+import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.Bill;
 import com.ptit.thuetruyenmgmt.model.Customer;
 import com.ptit.thuetruyenmgmt.model.RentedBook;
@@ -7,6 +8,7 @@ import com.ptit.thuetruyenmgmt.service.BillService;
 import com.ptit.thuetruyenmgmt.service.CustomerService;
 import com.ptit.thuetruyenmgmt.service.RentedBookService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -72,7 +74,13 @@ public class BillController {
                                          RedirectAttributes redirect) {
 
         // Xử lý tạo thông tin hoá đơn
-        Customer customer = customerService.getCustomerById(customerId);
+        Customer customer;
+        try {
+            customer = customerService.getCustomerById(customerId);
+        } catch (NotFoundException e) {
+            redirect.addFlashAttribute("errorNoti", "Khách hàng không tồn tại. Vui lòng thử lại!");
+            return new ModelAndView("redirect:/customer");
+        }
 
         // Kiểm tra đầu truyện đã chọn
         List<Integer> bookIds = (List<Integer>) session.getAttribute("selectedBookIds");
@@ -83,18 +91,24 @@ public class BillController {
         }
 
         List<RentedBook> rentedBooks = rentedBookService.getRentedBooksById(bookIds);
-        if (rentedBooks == null || rentedBooks.isEmpty()) {
+        if (rentedBooks.isEmpty()) {
             redirect.addFlashAttribute("returnNothing",
                     "Tạo thanh toán thất bại!!! Không có đầu truyện nào được chọn.");
             return new ModelAndView("redirect:/customer/rented-books=" + customerId);
         }
-        Bill billInfo = service.createPayInfo(rentedBooks, 1);
 
-        ModelAndView mav = new ModelAndView("gd-xac-nhan-thanh-toan");
-        mav.addObject("customerId", customerId);
-        mav.addObject("customerInfo", customer);
-        mav.addObject("paySuccess", false);
-        mav.addObject("bill", billInfo);
+        ModelAndView mav;
+        try {
+            Bill billInfo = service.createPayInfo(rentedBooks, 1);
+            mav = new ModelAndView("gd-xac-nhan-thanh-toan");
+            mav.addObject("customerId", customerId);
+            mav.addObject("customerInfo", customer);
+            mav.addObject("paySuccess", false);
+            mav.addObject("bill", billInfo);
+        } catch (NotFoundException e) {
+            mav = new ModelAndView("gd-chinh-nv");
+            mav.setStatus(HttpStatus.UNAUTHORIZED);
+        }
 
         return mav;
     }
@@ -114,8 +128,17 @@ public class BillController {
                                 @Valid Bill bill,
                                 HttpSession session,
                                 RedirectAttributes redirect) {
-        Customer customer = customerService.getCustomerById(customerId);
-        if (!service.saveBillInfo(bill)) {
+        Customer customer;
+        try {
+            customer = customerService.getCustomerById(customerId);
+        } catch (NotFoundException e) {
+            redirect.addFlashAttribute("errorNoti", "Khách hàng không tồn tại. Vui lòng thử lại!");
+            return new ModelAndView("redirect:/customer");
+        }
+
+        try {
+            service.saveBillInfo(bill);
+        } catch (Exception e) {
             redirect.addFlashAttribute("returnNothing",
                     "Tạo thanh toán thất bại!!!");
             return new ModelAndView("redirect:/customer/rented-books=" + customerId);
@@ -139,9 +162,9 @@ public class BillController {
     @GetMapping(value = "/customer/show-bill", params = {"paid"})
     public ModelAndView notifySuccessStatus(@RequestParam("customerId") Integer customerId,
                                             @RequestParam(name = "paid") boolean paidStatus,
-                                            RedirectAttributes redirect) {
-        if (!paidStatus) { // Check đúng luồng khi ở payBill
-            return new ModelAndView("redirect:/customer/rented-books=" + customerId);
+                                            Bill bill) {
+        if (bill.getRentedBooks() == null) { // Check đúng luồng được gửi từ payBill
+            return new ModelAndView("redirect:/customer");
         }
         ModelAndView mav = new ModelAndView("gd-xac-nhan-thanh-toan");
         mav.addObject("customerId", customerId);

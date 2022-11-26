@@ -23,8 +23,9 @@ public class CustomerController {
 
     // Gọi trang giao diện search hiển thị
     @GetMapping(path = {"/customer"})
-    public String getGDSearch() {
-        return "gd-tim-kh";
+    public ModelAndView getGDSearch() {
+        ModelAndView mav = new ModelAndView("gd-tim-kh");
+        return mav;
     }
 
     @GetMapping("/customer/search")
