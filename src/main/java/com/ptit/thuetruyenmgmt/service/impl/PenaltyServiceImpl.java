@@ -14,8 +14,12 @@ import java.util.Optional;
 @Service
 public class PenaltyServiceImpl implements PenaltyService {
 
+    private final PenaltyRepository repository;
+
     @Autowired
-    private PenaltyRepository repository;
+    public PenaltyServiceImpl(PenaltyRepository repository) {
+        this.repository = repository;
+    }
 
     private static final String RESOURCE_NAME = Customer.class.getSimpleName();
 

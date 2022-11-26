@@ -80,7 +80,7 @@ public class RentedBookController {
                                                  HttpSession session,
                                                  RedirectAttributes redirect) {
         List<RentedBook> books = selectedBooks.getWillBeReturnedBooks();
-        if (books.isEmpty()) {
+        if (books == null || books.isEmpty()) {
             redirect.addFlashAttribute("returnNothing", "Hãy chọn ít nhất 1 đầu truyện để trả!");
             return new ModelAndView("redirect:/customer/rented-books=" + customerId);
         }
@@ -188,7 +188,6 @@ public class RentedBookController {
     public ModelAndView saveRentedBook(@Valid @ModelAttribute("rentedBook") RentedBookDTO rentedBook,
                                        BindingResult result,
                                        RedirectAttributes redirect,
-                                       HttpSession session,
                                        @PathVariable(name = "id") Integer rentedBookId) {
 
         LOGGER.debug(rentedBook.toString());
