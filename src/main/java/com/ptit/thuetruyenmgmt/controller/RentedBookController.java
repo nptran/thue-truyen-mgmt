@@ -189,11 +189,12 @@ public class RentedBookController {
                                        BindingResult result,
                                        RedirectAttributes redirect,
                                        @PathVariable(name = "id") Integer rentedBookId) {
-
         LOGGER.debug(rentedBook.toString());
         if (result.hasErrors()) {
-            redirect.addFlashAttribute("failedMessage", "Dữ liệu trong form không hợp lệ");
-            return new ModelAndView("redirect:/rented-book/" + rentedBookId + "/penalties");
+            ModelAndView mav = new ModelAndView("redirect:/rented-book/" + rentedBookId + "/penalties");
+            mav.setStatus(HttpStatus.BAD_REQUEST);
+            redirect.addFlashAttribute("failedMessage", result.getAllErrors().get(0).getDefaultMessage());
+            return mav;
         }
         RentedBook originalRentedBook = service.getRentedBookById(rentedBookId);
         List<RentedBookPenalty> currPenalties = originalRentedBook.getPenalties() == null ? new ArrayList<>() : originalRentedBook.getPenalties(); // Nếu chưa có lỗi thì gán tạm list rỗng
@@ -213,13 +214,12 @@ public class RentedBookController {
         List<RentedBookPenalty> penalties = new ArrayList<>();
         for (Penalty penalty : selectedPenalties) {
             Penalty originalPenalty = penaltyService.getPenaltyById(penalty.getId());
-            double fee = penalty.getRecommendedFee();
             RentedBookPenalty rentedBookPenalty =
                     RentedBookPenalty.builder()
                             .id(new RentedBookPenaltyKey(originalRentedBook.getId(), originalPenalty.getId()))
                             .rentedBook(originalRentedBook)
                             .penalty(originalPenalty)
-                            .fee(fee)
+                            .fee(penalty.getRecommendedFee())
                             .build();
             penalties.add(rentedBookPenalty);
         }
@@ -228,13 +228,11 @@ public class RentedBookController {
         try {
             service.addPenaltiesIntoRentedBook(penalties, removedIds, originalRentedBook.getId());
         } catch (Exception e) {
+            ModelAndView mav = new ModelAndView("redirect:/rented-book/" + rentedBookId + "/penalties");
             redirect.addFlashAttribute("failedMessage", e.getMessage());
-            return new ModelAndView("redirect:/rented-book/" + rentedBookId + "/penalties");
+            mav.setStatus(HttpStatus.NOT_MODIFIED);
+            return mav;
         }
-
-
-//        List<Integer> selectedBooks = (List<Integer>) session.getAttribute("selectedBookIds");
-//        List<RentedBook> selectedRentedBooks = service.getRentedBooksById(selectedBooks);
 
         // Nếu lưu thành công chuyển hướng về trang Trả truyện
         redirect.addFlashAttribute("savePenaltiesSuccess", "Cập nhật lỗi truyện thành công!");

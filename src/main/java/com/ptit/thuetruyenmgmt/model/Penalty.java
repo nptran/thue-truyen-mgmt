@@ -28,7 +28,7 @@ public class Penalty implements Serializable {
     private String description;
 
     @Column
-    @Min(value = 0, message = "Mức Phí Phạt Tối Thiểu Là 500 Đồng")
+    @Min(value = 500, message = "Mức Phí Phạt Tối Thiểu Là 500 Đồng")
     private double recommendedFee;
 
     /**

@@ -1,13 +1,8 @@
 package com.ptit.thuetruyenmgmt.service;
 
 import com.ptit.thuetruyenmgmt.exception.NotFoundException;
-import com.ptit.thuetruyenmgmt.model.Address;
-import com.ptit.thuetruyenmgmt.model.Customer;
-import com.ptit.thuetruyenmgmt.model.FullName;
 import com.ptit.thuetruyenmgmt.model.Penalty;
-import com.ptit.thuetruyenmgmt.repository.CustomerRepository;
 import com.ptit.thuetruyenmgmt.repository.PenaltyRepository;
-import com.ptit.thuetruyenmgmt.service.impl.CustomerServiceImpl;
 import com.ptit.thuetruyenmgmt.service.impl.PenaltyServiceImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

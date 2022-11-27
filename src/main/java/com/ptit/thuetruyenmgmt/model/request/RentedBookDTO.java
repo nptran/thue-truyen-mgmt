@@ -3,6 +3,7 @@ package com.ptit.thuetruyenmgmt.model.request;
 import com.ptit.thuetruyenmgmt.model.*;
 import lombok.*;
 
+import javax.validation.Valid;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,7 @@ public class RentedBookDTO implements Serializable {
 
     private double amount;
 
+    @Valid
     private List<Penalty> penalties;
 
 }

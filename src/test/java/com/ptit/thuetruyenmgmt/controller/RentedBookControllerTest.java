@@ -49,6 +49,9 @@ public class RentedBookControllerTest {
     @Autowired
     private MockMvc mvc;
 
+    @Mock
+    private BindingResult bindingResult;
+
     private String kw;
 
     private Customer customer;
@@ -84,6 +87,7 @@ public class RentedBookControllerTest {
     private final List<Penalty> EMPTY_PENALTIES = new ArrayList<>();
 
     private List<RentedBookPenalty> penaltiesOfBook;
+
 
     /**
      * @param allAvailablePenalties - Tất cả penalties (phải có id 1 và 2)
@@ -566,7 +570,7 @@ public class RentedBookControllerTest {
     /**
      * {@link RentedBookController#saveRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 1
      *
-     * @POSITIVE: Có lỗi truyện được chọn lưu, không phí nào bị bỏ trống
+     * @POSITIVE: Truyện hiện tại không có lỗi, có lỗi truyện mới được chọn lưu, không phí nào bị bỏ trống
      * → Lưu thành công, chuyển về gd-tra-truyen
      */
     @Test
@@ -618,11 +622,69 @@ public class RentedBookControllerTest {
     /**
      * {@link RentedBookController#saveRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 2
      *
-     * @POSITIVE: Không có lỗi truyện nào được chọn lưu
+     * @POSITIVE: Truyện hiện tại đã có có lỗi, có thêm lỗi truyện mới được chọn lưu và một lỗi cũ bị xoá, không phí nào bị bỏ trống
      * → Lưu thành công, chuyển về gd-tra-truyen
      */
     @Test
     void whenSaveRentedBook_case2() throws Exception {
+        // Truyện hiện đã có lỗi id=1,2
+        RentedBook book = mockRentedBook(ALL_PENALTIES, 100, customer, true, 600, 1200);
+        List<RentedBookPenaltyKey> idsToRemove = new ArrayList<>();
+        idsToRemove.add(RentedBookPenaltyKey.builder().rentedBookId(book.getId()).penaltyId(1).build());
+
+        // Cập nhật bằng 4 lỗi mới id = 2,3,4,5 - Bỏ lỗi 1
+        RentedBook updatedBook = mockRentedBook(ALL_PENALTIES, 100, customer, false);
+        List<RentedBookPenalty> newPenOfBooks = getListOfRentedBookPenalties(updatedBook.getId(), 2,5, 1000);
+        updatedBook.setPenalties(newPenOfBooks);
+        List<Penalty> newPenalties = getListOfPenalties(2,5, 1000, false);
+        List<Penalty> unselectedPenalties = getListOfPenalties(1, 1, 1000, true);
+        List<Penalty> submitPenalties = new ArrayList<>(newPenalties);
+        submitPenalties.addAll(unselectedPenalties);
+
+        RentedBookDTO submitBook =
+                RentedBookDTO.builder()
+                        .customerId(book.getCustomer().getId())
+                        .rentedBookId(book.getId())
+                        .code(book.getBookTitle().getCode())
+                        .titleName(book.getBookTitle().getTitleName())
+                        .penalties(submitPenalties)
+                        .build();
+
+
+        when(service.getRentedBookById(book.getId())).thenReturn(book);
+        for (Penalty p : ALL_PENALTIES) {
+            when(penaltyService.getPenaltyById(p.getId())).thenReturn(p);
+        }
+        when(service.addPenaltiesIntoRentedBook(updatedBook.getPenalties(), idsToRemove, book.getId())).thenReturn(updatedBook);
+
+        this.mvc.perform(
+                        post("/rented-book/{id}/save-penalties", book.getId())
+                                .flashAttr("rentedBook", submitBook)
+                                .sessionAttr("selectedBookIds", getListOfInts(1, 3)) // Trước đó NV chọn 3 truyện để trả
+                )
+                // Mong đợi quay lai giao diện tra-truyen
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/rented-book/selected-of=" + book.getCustomer().getId()));
+
+        verify(service, times(1)).getRentedBookById(book.getId());
+        for (Penalty p : newPenalties) {
+            verify(penaltyService, times(1)).getPenaltyById(p.getId());
+        }
+        verify(service, times(1)).addPenaltiesIntoRentedBook(updatedBook.getPenalties(), idsToRemove, book.getId());
+
+        verifyNoMoreInteractions(service);
+        verifyNoMoreInteractions(penaltyService);
+    }
+
+
+    /**
+     * {@link RentedBookController#saveRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 3
+     *
+     * @POSITIVE: Không có lỗi truyện nào được chọn lưu
+     * → Lưu thành công, chuyển về gd-tra-truyen
+     */
+    @Test
+    void whenSaveRentedBook_case3() throws Exception {
         // Truyện hiện tại có 2 lỗi
         RentedBook book = mockRentedBook(ALL_PENALTIES, 100, customer, true, 1500, 2000);
         List<RentedBookPenaltyKey> idsToRemove = getKeys(book.getPenalties());
@@ -659,7 +721,103 @@ public class RentedBookControllerTest {
     }
 
 
-    // Các hàm tạo mock data:
+    /**
+     * {@link RentedBookController#saveRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 4
+     *
+     * @POSITIVE: Phí phạt không hợp lệ
+     * → Lưu không thành công, ở lại trang cap-nhat-loi-truyen
+     */
+    @Test
+    void whenSaveRentedBook_case4() throws Exception {
+        // Truyện hiện tại có 2 lỗi
+        RentedBook book = mockRentedBook(ALL_PENALTIES, 100, customer, true, 1500, 2000);
+        List<RentedBookPenaltyKey> idsToRemove = getKeys(book.getPenalties());
+
+        // Update lại không có lỗi
+        RentedBook updatedBook = mockRentedBook(ALL_PENALTIES, 100, customer, false);
+        List<Penalty> submitPenalties = getListOfPenalties(1, 5, 1000, true);
+        submitPenalties.get(0).setRecommendedFee(200); // Một lỗi < 500 đồng
+        RentedBookDTO submitBook =
+                RentedBookDTO.builder()
+                        .customerId(book.getCustomer().getId())
+                        .rentedBookId(book.getId())
+                        .code(book.getBookTitle().getCode())
+                        .titleName(book.getBookTitle().getTitleName())
+                        .penalties(submitPenalties)
+                        .build();
+
+        when(service.getRentedBookById(book.getId())).thenReturn(book);
+        when(service.addPenaltiesIntoRentedBook(new ArrayList<>(), idsToRemove, book.getId())).thenReturn(updatedBook);
+
+        this.mvc.perform(
+                        post("/rented-book/{id}/save-penalties", submitBook.getRentedBookId())
+                                .flashAttr("rentedBook", submitBook)
+                                .sessionAttr("selectedBookIds", getListOfInts(1, 3)) // Trước đó NV chọn 3 truyện để trả
+                )
+                // Mong đợi ở lai giao diện cap-nhat-loi-truyen
+                .andExpect(status().isBadRequest())
+                .andExpect(redirectedUrl("/rented-book/" + book.getId() + "/penalties"));
+
+        verifyNoInteractions(service);
+        verifyNoInteractions(penaltyService);
+    }
+
+
+    /**
+     * {@link RentedBookController#saveRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 5
+     *
+     * @POSITIVE: Lỗi khi cập nhật lỗi truyện cho RentedBook
+     * → 304 - Lưu không thành công, ở lại trang cap-nhat-loi-truyen
+     */
+    @Test
+    void whenSaveRentedBook_case5() throws Exception {
+        // Truyện hiện tại có 2 lỗi
+        RentedBook book = mockRentedBook(ALL_PENALTIES, 100, customer, true, 1500, 2000);
+        List<RentedBookPenaltyKey> idsToRemove = getKeys(book.getPenalties());
+
+        // Update lại bằng 2 lỗi khác
+        List<Penalty> uncheckedPenalties = getListOfPenalties(1, 3, 1000, true);
+        List<Penalty> checkedPenalties = getListOfPenalties(3, 5, 1000, false);
+        List<RentedBookPenalty> newPenOfBooks = getListOfRentedBookPenalties(book.getId(), 3, 5, 1000);
+        List<Penalty> submitPenalties = new ArrayList<>(uncheckedPenalties);
+        submitPenalties.addAll(checkedPenalties);
+        RentedBookDTO submitBook =
+                RentedBookDTO.builder()
+                        .customerId(book.getCustomer().getId())
+                        .rentedBookId(book.getId())
+                        .code(book.getBookTitle().getCode())
+                        .titleName(book.getBookTitle().getTitleName())
+                        .penalties(submitPenalties)
+                        .build();
+
+
+        when(service.getRentedBookById(book.getId())).thenReturn(book);
+        for (Penalty p : ALL_PENALTIES) {
+            when(penaltyService.getPenaltyById(p.getId())).thenReturn(p);
+        }
+        when(service.addPenaltiesIntoRentedBook(newPenOfBooks, idsToRemove, book.getId())).thenThrow(RuntimeException.class);
+
+        this.mvc.perform(
+                        post("/rented-book/{id}/save-penalties", submitBook.getRentedBookId())
+                                .flashAttr("rentedBook", submitBook)
+                                .sessionAttr("selectedBookIds", getListOfInts(1, 3)) // Trước đó NV chọn 3 truyện để trả
+                )
+                // Mong đợi quay lai giao diện tra-truyen
+                .andExpect(status().isNotModified())
+                .andExpect(redirectedUrl("/rented-book/" + book.getId() + "/penalties"));
+
+        verify(service, times(1)).getRentedBookById(book.getId());
+        for (Penalty p : checkedPenalties) {
+            verify(penaltyService, times(1)).getPenaltyById(p.getId());
+        }
+        verify(service, times(1)).addPenaltiesIntoRentedBook(newPenOfBooks, idsToRemove, book.getId());
+
+        verifyNoMoreInteractions(service);
+        verifyNoMoreInteractions(penaltyService);
+    }
+
+
+    //=============================================== Các hàm tạo mock data ===============================================
 
     private List<Integer> getListOfInts(int from, int to) {
         return IntStream.range(from, to).boxed().collect(Collectors.toList());

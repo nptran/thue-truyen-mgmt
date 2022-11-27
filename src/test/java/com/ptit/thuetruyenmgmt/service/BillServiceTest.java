@@ -20,7 +20,6 @@ import org.mockito.Mock;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.doNothing;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

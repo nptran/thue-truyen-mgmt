@@ -1,15 +1,11 @@
 package com.ptit.thuetruyenmgmt.service;
 
-import com.ptit.thuetruyenmgmt.exception.FailedToPayException;
 import com.ptit.thuetruyenmgmt.exception.FailedToResetBookPenaltiesException;
 import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.*;
 import com.ptit.thuetruyenmgmt.model.key.RentedBookPenaltyKey;
-import com.ptit.thuetruyenmgmt.repository.PenaltyRepository;
 import com.ptit.thuetruyenmgmt.repository.RentedBookPenaltyRepository;
 import com.ptit.thuetruyenmgmt.repository.RentedBookRepository;
-import com.ptit.thuetruyenmgmt.service.impl.CustomerServiceImpl;
-import com.ptit.thuetruyenmgmt.service.impl.PenaltyServiceImpl;
 import com.ptit.thuetruyenmgmt.service.impl.RentedBookServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -18,10 +14,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
