@@ -26,7 +26,7 @@ public class BookTitle implements Serializable {
     private String titleName;
 
     @Column
-    private String quantity;
+    private int quantity;
 
     @Column
     private String author;
