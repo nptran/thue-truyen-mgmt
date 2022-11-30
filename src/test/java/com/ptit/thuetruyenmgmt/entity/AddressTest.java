@@ -111,6 +111,7 @@ class AddressTest {
         assertEquals(expectedCity, address.getCity());
     }
 
+
     @Test
     void testToString() throws IllegalAccessException {
         // WHEN
@@ -121,6 +122,76 @@ class AddressTest {
 
         // THEN
         String expectedString = "Trần Phú, Hà Đông, Hà Nội";
+        assertEquals(expectedString, address.toString());
+    }
+
+
+    @Test
+    void testToString_whenNoStreet() throws IllegalAccessException {
+        String expectedString = "Hà Đông, Hà Nội";
+
+        // WHEN NULL
+        id.set(address, expectedId);
+        district.set(address, expectedDistrict);
+        city.set(address, expectedCity);
+
+        // THEN
+        assertEquals(expectedString, address.toString());
+
+
+        // WHEN EMPTY
+        id.set(address, expectedId);
+        street.set(address, " ");
+        district.set(address, expectedDistrict);
+        city.set(address, expectedCity);
+
+        // THEN
+        assertEquals(expectedString, address.toString());
+    }
+
+
+    @Test
+    void testToString_whenNoDistrict() throws IllegalAccessException {
+        String expectedString = "Trần Phú, Hà Nội";
+
+        // WHEN NULL
+        id.set(address, expectedId);
+        street.set(address, expectedStreet);
+        city.set(address, expectedCity);
+
+        // THEN
+        assertEquals(expectedString, address.toString());
+
+        // WHEN EMPTY
+        id.set(address, expectedId);
+        street.set(address, expectedStreet);
+        district.set(address, "  ");
+        city.set(address, expectedCity);
+
+        // THEN
+        assertEquals(expectedString, address.toString());
+    }
+
+
+    @Test
+    void testToString_whenNoCity() throws IllegalAccessException {
+        String expectedString = "Trần Phú, Hà Đông";
+
+        // WHEN NULL
+        id.set(address, expectedId);
+        street.set(address, expectedStreet);
+        district.set(address, expectedDistrict);
+
+        // THEN
+        assertEquals(expectedString, address.toString());
+
+        // WHEN EMPTY
+        id.set(address, expectedId);
+        street.set(address, expectedStreet);
+        district.set(address, expectedDistrict);
+        city.set(address, " ");
+
+        // THEN
         assertEquals(expectedString, address.toString());
     }
 
