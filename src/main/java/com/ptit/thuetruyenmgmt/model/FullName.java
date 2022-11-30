@@ -1,7 +1,7 @@
 package com.ptit.thuetruyenmgmt.model;
 
 import lombok.*;
-import org.apache.commons.lang3.StringUtils;
+import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -27,9 +27,9 @@ public class FullName implements Serializable {
 
     @Override
     public String toString() {
-        String lNameStr = lName.trim().isEmpty() ? "" : lName + " ";
-        String fNameStr = fName.trim().isEmpty() ? "" : fName;
+        String lNameStr = lName == null || lName.trim().isEmpty() ? "" : lName + " ";
+        String fNameStr = fName == null || fName.trim().isEmpty() ? "" : fName;
 
-        return StringUtils.capitalize((lNameStr + fNameStr).trim());
+        return StringUtils.capitalizeWords((lNameStr + fNameStr).trim());
     }
 }
