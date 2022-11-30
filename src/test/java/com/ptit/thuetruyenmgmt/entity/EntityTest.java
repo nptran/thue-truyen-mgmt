@@ -24,7 +24,7 @@ interface EntityTest {
     void testToString() throws IllegalAccessException;
 
 
-    void testEquals();
+    void testEquals() throws NoSuchFieldException, IllegalAccessException;
 
 
     void testHashCode();
