@@ -2,9 +2,12 @@ package com.ptit.thuetruyenmgmt.model;
 
 import com.ptit.thuetruyenmgmt.model.key.RentedBookPenaltyKey;
 import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -21,14 +24,14 @@ public class RentedBookPenalty implements Serializable {
     private RentedBookPenaltyKey id;
 
     /**
-     * Map sang {@link java.util.List} {@link RentedBook#penalties} trong {@link RentedBook}
+     * Map sang {@link List} {@link RentedBook#penalties} trong {@link RentedBook}
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("rentedBookId")
     private RentedBook rentedBook;
 
     /**
-     * Map sang {@link java.util.List} {@link Penalty#detectedPenalties} trong {@link Penalty}
+     * Map sang {@link List} {@link Penalty#detectedPenalties} trong {@link Penalty}
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("penaltyId")
@@ -39,14 +42,16 @@ public class RentedBookPenalty implements Serializable {
 
     // Được coi là trùng nhau khi trùng BookId và Penalty Id
     @Override
-    public boolean equals(Object obj) {
-        return (obj instanceof RentedBookPenalty)
-                && ((RentedBookPenalty) obj).getId().getRentedBookId().equals(this.id.getRentedBookId())
-                && ((RentedBookPenalty) obj).getId().getPenaltyId().equals(this.id.getPenaltyId());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        RentedBookPenalty that = (RentedBookPenalty) o;
+        return id != null && Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return this.id.getRentedBookId().hashCode() + this.id.getPenaltyId().hashCode();
+        return Objects.hash(id);
     }
+
 }
