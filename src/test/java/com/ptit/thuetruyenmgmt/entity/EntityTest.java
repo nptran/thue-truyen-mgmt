@@ -1,7 +1,7 @@
 package com.ptit.thuetruyenmgmt.entity;
 
 
-interface EntityTest {
+public interface EntityTest {
 
     /**
      * GIVEN
