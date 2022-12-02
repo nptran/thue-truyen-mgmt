@@ -21,26 +21,26 @@ public class User implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    protected Integer id;
 
     @Column(unique = true)
-    private String loginCode;
+    protected String loginCode;
 
     @Column(name = "date_of_birth")
-    private LocalDate dob;
+    protected LocalDate dob;
 
     @Column
-    private String email;
+    protected String email;
 
     @Column
-    private String phone;
+    protected String phone;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "name_id")
-    private FullName fullName;
+    protected FullName fullName;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "address_id")
-    private Address address;
+    protected Address address;
 
 }

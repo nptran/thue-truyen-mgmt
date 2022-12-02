@@ -6,7 +6,7 @@ interface EntityTest {
     /**
      * GIVEN
      */
-    void initData() throws NoSuchFieldException;
+    void initData() throws NoSuchFieldException, IllegalAccessException;
 
 
     void testFullArgConstructor() throws IllegalAccessException;
