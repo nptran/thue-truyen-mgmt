@@ -38,7 +38,7 @@ public class Staff extends User {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Staff staff = (Staff) o;
-        return (id == null && ((Penalty) o).getId() == null) || getId() != null && Objects.equals(getId(), staff.getId());
+        return (id == null && staff.id == null) || getId() != null && Objects.equals(getId(), staff.getId());
     }
 
     @Override
