@@ -108,6 +108,13 @@ public class RentedBookPenaltyTest implements EntityTest {
         anotherId.set(anotherRentedBookPenalty, expectedId);
         assertFalse(rentedBookPenalty.equals(anotherRentedBookPenalty));
 
+        // Compare to another with id = NULL too
+        anotherId.set(anotherRentedBookPenalty, null);
+        assertTrue(rentedBookPenalty.equals(anotherRentedBookPenalty));
+
+        /*
+         *  WHEN this id != NULL
+         */
         id.set(rentedBookPenalty, expectedId);
 
         // Compare to itself

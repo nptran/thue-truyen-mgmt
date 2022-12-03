@@ -147,13 +147,20 @@ public class RentedBookTest implements EntityTest {
     @Test
     @Override
     public void testEquals() throws NoSuchFieldException, IllegalAccessException {
-        // When its id is NULL
+        // When this id is NULL
         RentedBook anotherRentedBook = new RentedBook();
         Field anotherId = anotherRentedBook.getClass().getDeclaredField("id");
         anotherId.setAccessible(true);
         anotherId.set(anotherRentedBook, expectedId);
         assertFalse(rentedBook.equals(anotherRentedBook));
 
+        // Compare to another with id = NULL too
+        anotherId.set(anotherRentedBook, null);
+        assertTrue(rentedBook.equals(anotherRentedBook));
+
+        /*
+         *  WHEN this id != NULL
+         */
         id.set(rentedBook, expectedId);
 
         // Compare to itself

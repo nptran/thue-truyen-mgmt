@@ -182,6 +182,13 @@ public class StaffTest implements EntityTest {
         anotherId.set(anotherStaff, expectedId);
         assertFalse(staff.equals(anotherStaff));
 
+        // Compare to another with id = NULL too
+        anotherId.set(anotherStaff, null);
+        assertTrue(staff.equals(anotherStaff));
+
+        /*
+         *  WHEN this id != NULL
+         */
         id.set(staff, expectedId);
 
         // Compare to itself
