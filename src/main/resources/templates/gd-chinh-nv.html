@@ -7,7 +7,7 @@
     <nav th:replace="fragments/layout :: header"></nav>
     <div class="hero">
         <h1>Hệ Thống Quản Lý Cửa Hàng</h1>
-        <p>Chào mừng Nhân viên X<br>Vui lòng chọn một chức năng bên dưới</p>
+        <p>Xin chào Nhân viên <span th:text="${staffName}"></span><br>Vui lòng chọn một chức năng bên dưới</p>
         <a class="btn btn-primary" th:href="@{/customer}">Tìm Kiếm Khách Hàng</a><br>
         <a class="btn btn-primary">Khác</a>
     </div>

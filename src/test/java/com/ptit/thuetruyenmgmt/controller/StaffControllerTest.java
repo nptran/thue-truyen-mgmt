@@ -23,6 +23,7 @@ public class StaffControllerTest {
     public void testHome_whenEmptyPath() throws Exception {
         HttpSession actualSession = this.mvc.perform(get("/"))
                 .andExpect(view().name("gd-chinh-nv"))
+                .andExpect(model().attribute("staffName", "Phạm Hải Yến"))
                 .andReturn().getRequest().getSession();
         assert actualSession != null;
         assert actualSession.getAttribute("loginCode") != null;
@@ -36,6 +37,7 @@ public class StaffControllerTest {
     public void testHome_whenHomePath() throws Exception {
         HttpSession actualSession = this.mvc.perform(get("/"))
                 .andExpect(view().name("gd-chinh-nv"))
+                .andExpect(model().attribute("staffName", "Phạm Hải Yến"))
                 .andReturn().getRequest().getSession();
         assert actualSession != null;
         assert actualSession.getAttribute("loginCode") != null;
