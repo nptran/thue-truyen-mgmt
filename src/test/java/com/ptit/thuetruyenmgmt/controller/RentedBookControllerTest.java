@@ -622,7 +622,7 @@ public class RentedBookControllerTest {
         for (Penalty p : newPenalties) {
             verify(penaltyService, times(1)).getPenaltyById(p.getId());
         }
-        verify(service, times(1)).addPenaltiesIntoRentedBook(updatedBook.getPenalties(), new ArrayList<>(), book.getId());
+        verify(service, times(1)).addPenaltiesIntoRentedBook(anyList(), anyList(), anyInt());
 
         verifyNoMoreInteractions(service);
         verifyNoMoreInteractions(penaltyService);
@@ -680,7 +680,7 @@ public class RentedBookControllerTest {
         for (Penalty p : newPenalties) {
             verify(penaltyService, times(1)).getPenaltyById(p.getId());
         }
-        verify(service, times(1)).addPenaltiesIntoRentedBook(updatedBook.getPenalties(), idsToRemove, book.getId());
+        verify(service, times(1)).addPenaltiesIntoRentedBook(anyList(), anyList(), anyInt());
 
         verifyNoMoreInteractions(service);
         verifyNoMoreInteractions(penaltyService);
@@ -805,7 +805,7 @@ public class RentedBookControllerTest {
         for (Penalty p : ALL_PENALTIES) {
             when(penaltyService.getPenaltyById(p.getId())).thenReturn(p);
         }
-        when(service.addPenaltiesIntoRentedBook(newPenOfBooks, idsToRemove, book.getId())).thenThrow(RuntimeException.class);
+        when(service.addPenaltiesIntoRentedBook(anyList(), anyList(), anyInt())).thenThrow(RuntimeException.class);
 
         this.mvc.perform(
                         post("/rented-book/{id}/save-penalties", submitBook.getRentedBookId())
@@ -820,7 +820,7 @@ public class RentedBookControllerTest {
         for (Penalty p : checkedPenalties) {
             verify(penaltyService, times(1)).getPenaltyById(p.getId());
         }
-        verify(service, times(1)).addPenaltiesIntoRentedBook(newPenOfBooks, idsToRemove, book.getId());
+        verify(service, times(1)).addPenaltiesIntoRentedBook(anyList(), anyList(), anyInt());
 
         verifyNoMoreInteractions(service);
         verifyNoMoreInteractions(penaltyService);
