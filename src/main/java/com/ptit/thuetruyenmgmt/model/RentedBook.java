@@ -1,13 +1,16 @@
 package com.ptit.thuetruyenmgmt.model;
 
 import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,21 +32,21 @@ public class RentedBook implements Serializable {
 
 
     /**
-     * Map sang {@link java.util.List} {@link BookTitle#rentedBooks} trong {@link BookTitle}
+     * Map sang {@link List} {@link BookTitle#rentedBooks} trong {@link BookTitle}
      */
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH})
     @JoinColumn(name = "book_title_id", referencedColumnName = "id", nullable = false)
     private BookTitle bookTitle;
 
     /**
-     * Map sang {@link java.util.List} {@link Customer#rentedBooks} trong {@link Customer}
+     * Map sang {@link List} {@link Customer#rentedBooks} trong {@link Customer}
      */
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH})
     @JoinColumn(name = "customer_id", referencedColumnName = "id", nullable = false)
     private Customer customer;
 
     /**
-     * Map sang {@link java.util.List} {@link Bill#rentedBooks} trong {@link Bill}
+     * Map sang {@link List} {@link Bill#rentedBooks} trong {@link Bill}
      */
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH})
     @JoinColumn(name = "bill_id", referencedColumnName = "id")
@@ -57,5 +60,18 @@ public class RentedBook implements Serializable {
 
     @Column
     private boolean isPaid;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        RentedBook that = (RentedBook) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 
 }

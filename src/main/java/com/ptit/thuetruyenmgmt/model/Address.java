@@ -1,6 +1,7 @@
 package com.ptit.thuetruyenmgmt.model;
 
 import lombok.*;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -29,10 +30,10 @@ public class Address implements Serializable {
 
     @Override
     public String toString() {
-        String street_str = street.trim().isEmpty() ? "" : street.trim() + ", ";
-        String district_str = district.trim().isEmpty() ? "" : district.trim() + ", ";
-        String city_str = city.trim().isEmpty() ? "" : city.trim();
+        String streetStr = street == null || street.trim().isEmpty() ? "" : street.trim() + ", ";
+        String districtStr = district == null || district.trim().isEmpty() ? "" : district.trim() + ", ";
+        String cityStr = city == null || city.trim().isEmpty() ? "" : city.trim();
 
-        return street_str + district_str + city_str;
+        return StringUtils.strip((streetStr + districtStr + cityStr).trim(), ",");
     }
 }
