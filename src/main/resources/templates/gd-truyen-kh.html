@@ -51,7 +51,7 @@
                                 <td th:text="${book?.bookTitle?.code}"></td>
                                 <td th:text="${book?.bookTitle?.titleName}"></td>
                                 <td th:text="${book?.rentedTime}"></td>
-                                <td th:text="${book?.amount+'đ'}"></td>
+                                <td th:text="${#numbers.formatCurrency(book?.amount)}"></td>
                                 <td><input class="form-control" type="checkbox" name="willBeReturnedBooks" th:field="*{willBeReturnedBooks}" th:value="${book.id}"/></td>
                                 <!--            <td><a th:href="@{/student/{id}/delete(id=${customer.id})}"><span-->
                                 <!--                    class="glyphicon glyphicon-trash"></span></a></td>-->

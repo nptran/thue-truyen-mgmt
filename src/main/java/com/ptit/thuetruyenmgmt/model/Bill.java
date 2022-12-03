@@ -22,7 +22,7 @@ public class Bill implements Serializable {
     private Integer id;
 
     @Column
-    private double totalAmount;
+    private long totalAmount;
 
     @Column
     private LocalDateTime createTime;

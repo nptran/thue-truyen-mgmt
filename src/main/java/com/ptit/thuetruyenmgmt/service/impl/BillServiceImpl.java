@@ -60,7 +60,7 @@ public class BillServiceImpl implements BillService {
 
         return Bill.builder()
                 .createTime(now)
-                .totalAmount(totalAmount)
+                .totalAmount(Math.round(totalAmount))
                 .rentedBooks(rentedBooks)
                 .staff(staff)
                 .build();

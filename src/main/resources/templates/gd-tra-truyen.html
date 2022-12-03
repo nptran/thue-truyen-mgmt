@@ -60,11 +60,11 @@
                             <td th:text="${book.code}"></td>
                             <td th:text="${book.titleName}"></td>
                             <td th:text="${book.rentedTime.toString()}"></td>
-                            <td th:text="${book.amount+'đ'}"></td>
+                            <td th:text="${#numbers.formatCurrency(book.amount)}"></td>
                             <td>
                                 <ul class="list-group">
                                     <li class="list-group-item" th:each="p, stat : ${book.penalties}"
-                                        th:text="${p.name + ': ' + p.recommendedFee+'đ'}">
+                                        th:text="${p.name + ': ' + #numbers.formatCurrency(p.recommendedFee)}">
                                     </li>
                                 </ul>
                             </td>

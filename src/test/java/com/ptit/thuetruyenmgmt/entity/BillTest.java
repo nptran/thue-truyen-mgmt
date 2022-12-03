@@ -20,7 +20,7 @@ class BillTest {
 
     private Integer expectedId;
 
-    private double expectedTotalAmount;
+    private long expectedTotalAmount;
 
     private LocalDateTime expectedCreateTime;
 
@@ -41,7 +41,7 @@ class BillTest {
     void initData() throws NoSuchFieldException {
         bill = new Bill();
         expectedId = 1;
-        expectedTotalAmount = 100.99;
+        expectedTotalAmount = 100000;
         expectedCreateTime = LocalDateTime.of(2022, 10, 10, 10, 0, 0);
 
         expectedRentedBooks = new ArrayList<>();
