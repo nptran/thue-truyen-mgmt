@@ -13,11 +13,11 @@ import com.ptit.thuetruyenmgmt.repository.CustomerRepository;
 import com.ptit.thuetruyenmgmt.repository.RentedBookRepository;
 import com.ptit.thuetruyenmgmt.repository.StaffRepository;
 import com.ptit.thuetruyenmgmt.service.impl.BillServiceImpl;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -105,7 +105,7 @@ public class BillServiceTest {
         mockBooks.add(b1);
         mockBooks.add(b2);
 
-        Assertions.assertThatThrownBy(() -> service.createPayInfo(mockBooks, mockStaffId))
+        assertThatThrownBy(() -> service.createPayInfo(mockBooks, mockStaffId))
                 .isInstanceOf(NotFoundException.class);
 
         verify(staffRepository, times(1)).findById(mockStaffId);
@@ -121,7 +121,7 @@ public class BillServiceTest {
         Staff mockStaff = Staff.staffBuilder().id(1).build();
         when(staffRepository.findById(mockStaff.getId())).thenReturn(Optional.ofNullable(mockStaff));
 
-        Assertions.assertThatThrownBy(() -> service.createPayInfo(new ArrayList<>(), mockStaff.getId()))
+        assertThatThrownBy(() -> service.createPayInfo(new ArrayList<>(), mockStaff.getId()))
                 .isInstanceOf(NoneSelectedBookToReturnException.class);
 
         verify(staffRepository, times(1)).findById(1);
@@ -137,7 +137,7 @@ public class BillServiceTest {
         Staff mockStaff = Staff.staffBuilder().id(1).build();
         when(staffRepository.findById(mockStaff.getId())).thenReturn(Optional.ofNullable(mockStaff));
 
-        Assertions.assertThatThrownBy(() -> service.createPayInfo(null, mockStaff.getId()))
+        assertThatThrownBy(() -> service.createPayInfo(null, mockStaff.getId()))
                 .isInstanceOf(NoneSelectedBookToReturnException.class);
 
         verify(staffRepository, times(1)).findById(1);
@@ -171,7 +171,7 @@ public class BillServiceTest {
 
         verify(repository, times(1)).save(mock);
         for (RentedBook b : mockBooks) {
-            verify(rentedBookRepository, times(1)).findById(anyInt());
+            verify(rentedBookRepository, times(1)).findById(b.getId());
         }
         verify(rentedBookRepository, times(1)).saveAllAndFlush(mockBooks);
     }
@@ -184,9 +184,14 @@ public class BillServiceTest {
     @Test
     void whenSaveBillInfo_cannotSave_shouldThrowFailedToPayException() {
         Bill mock = new Bill();
+
+        RentedBook mockRentedBook = RentedBook.builder().id(1).build();
+        List<RentedBook> books = new ArrayList<>();
+        books.add(mockRentedBook);
+        mock.setRentedBooks(books);
         when(repository.save(mock)).thenThrow(RuntimeException.class);
 
-        Assertions.assertThatThrownBy(() -> service.saveBillInfo(mock))
+        assertThatThrownBy(() -> service.saveBillInfo(mock))
                 .isInstanceOf(FailedToPayException.class);
 
         verify(repository, times(1)).save(mock);
@@ -197,7 +202,7 @@ public class BillServiceTest {
 
     /**
      * @NEGATIVE: Lưu thanh toán thất bại do không tìm thấy đầu truyện
-     * → {@link com.ptit.thuetruyenmgmt.exception.FailedToPayException}
+     * → {@link FailedToPayException}
      */
     @Test
     void whenSaveBillInfo_notFoundBook_shouldThrowFailedToPayException() {
@@ -213,19 +218,19 @@ public class BillServiceTest {
 
         Bill mock = Bill.builder().rentedBooks(mockBooks).build();
         when(repository.save(mock)).thenReturn(mock);
-        // Ngẫu nhiên một book bị lỗi
+        // Ngẫu nhiên mock một book không tìm thấy
         Random rand = new Random();
         int index = rand.nextInt(mockBooks.size()) + 1;
         for (RentedBook b : mockBooks) {
             if (b.getId() == index) {
-                when(rentedBookRepository.findById(mockB1.getId())).thenThrow(new RuntimeException());
+                when(rentedBookRepository.findById(b.getId())).thenReturn(Optional.empty());
                 break;
             }
             when(rentedBookRepository.findById(b.getId())).thenReturn(Optional.of(b));
         }
         when(rentedBookRepository.saveAllAndFlush(mockBooks)).thenReturn(mockBooks);
 
-        Assertions.assertThatThrownBy(() -> service.saveBillInfo(mock))
+        assertThatThrownBy(() -> service.saveBillInfo(mock))
                 .isInstanceOf(FailedToPayException.class);
 
         verify(repository, times(1)).save(mock);
@@ -236,7 +241,7 @@ public class BillServiceTest {
 
     /**
      * @NEGATIVE: Lưu thanh toán thất bại do cập nhật đầu truyện xảy ra lỗi
-     * → {@link com.ptit.thuetruyenmgmt.exception.FailedToPayException}
+     * → {@link FailedToPayException}
      */
     @Test
     void whenSaveBillInfo_cannotUpdateRentedBookStatus_shouldThrowFailedToPayException() {
@@ -257,7 +262,7 @@ public class BillServiceTest {
         }
         when(rentedBookRepository.saveAllAndFlush(mockBooks)).thenThrow(RuntimeException.class);
 
-        Assertions.assertThatThrownBy(() -> service.saveBillInfo(mock))
+        assertThatThrownBy(() -> service.saveBillInfo(mock))
                 .isInstanceOf(FailedToPayException.class);
 
         verify(repository, times(1)).save(mock);
@@ -278,7 +283,7 @@ public class BillServiceTest {
         List<RentedBook> mockBooks = new ArrayList<>();
 
         Bill mockBill = Bill.builder().rentedBooks(mockBooks).build();
-        Assertions.assertThatThrownBy(() -> service.saveBillInfo(mockBill))
+        assertThatThrownBy(() -> service.saveBillInfo(mockBill))
                 .isInstanceOf(NoneSelectedBookToReturnException.class);
 
         verify(repository, times(0)).save(any());
@@ -295,12 +300,12 @@ public class BillServiceTest {
     void whenSaveBillInfo_nullBooks_shouldThrowFailedToPayException() {
         // DS null
         Bill mockBill = Bill.builder().rentedBooks(null).build();
-        Assertions.assertThatThrownBy(() -> service.saveBillInfo(mockBill))
+        assertThatThrownBy(() -> service.saveBillInfo(mockBill))
                 .isInstanceOf(NoneSelectedBookToReturnException.class);
 
         verify(repository, times(0)).save(any());
         verify(rentedBookRepository, times(0)).findById(anyInt());
         verify(rentedBookRepository, times(0)).saveAllAndFlush(anyList());
     }
-
+    
 }
