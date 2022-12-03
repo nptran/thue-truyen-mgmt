@@ -40,9 +40,6 @@ public class BillServiceTest {
     private BillRepository repository;
 
     @Mock
-    private CustomerRepository customerRepository;
-
-    @Mock
     private RentedBookRepository rentedBookRepository;
 
     @Mock
@@ -59,7 +56,7 @@ public class BillServiceTest {
     @Test
     void createPayInfo_shouldReturnBill() {
         Staff mockStaff = Staff.staffBuilder().id(1).build();
-        when(staffRepository.findById(mockStaff.getId())).thenReturn(Optional.ofNullable(mockStaff));
+        when(staffRepository.findById(mockStaff.getId())).thenReturn(Optional.of(mockStaff));
 
         // 2 truyện mượn 1 ngày trước
         // Truyện 1 có 2 lỗi
@@ -81,6 +78,10 @@ public class BillServiceTest {
         assertEquals(mockStaff, actual.getStaff());
 
         verify(staffRepository, times(1)).findById(mockStaff.getId());
+
+        verifyNoMoreInteractions(staffRepository);
+        verifyNoInteractions(repository);
+        verifyNoInteractions(rentedBookRepository);
     }
 
 
@@ -109,6 +110,10 @@ public class BillServiceTest {
                 .isInstanceOf(NotFoundException.class);
 
         verify(staffRepository, times(1)).findById(mockStaffId);
+
+        verifyNoMoreInteractions(staffRepository);
+        verifyNoInteractions(repository);
+        verifyNoInteractions(rentedBookRepository);
     }
 
 
@@ -119,12 +124,16 @@ public class BillServiceTest {
     @Test
     void whenCreatePayInfo_emptyBooks_shouldThrowNoneSelectedBookToReturnException() {
         Staff mockStaff = Staff.staffBuilder().id(1).build();
-        when(staffRepository.findById(mockStaff.getId())).thenReturn(Optional.ofNullable(mockStaff));
+        when(staffRepository.findById(mockStaff.getId())).thenReturn(Optional.of(mockStaff));
 
         assertThatThrownBy(() -> service.createPayInfo(new ArrayList<>(), mockStaff.getId()))
                 .isInstanceOf(NoneSelectedBookToReturnException.class);
 
         verify(staffRepository, times(1)).findById(1);
+
+        verifyNoMoreInteractions(staffRepository);
+        verifyNoInteractions(repository);
+        verifyNoInteractions(rentedBookRepository);
     }
 
 
@@ -135,12 +144,16 @@ public class BillServiceTest {
     @Test
     void whenCreatePayInfo_nullBooks_shouldThrowNoneSelectedBookToReturnException() {
         Staff mockStaff = Staff.staffBuilder().id(1).build();
-        when(staffRepository.findById(mockStaff.getId())).thenReturn(Optional.ofNullable(mockStaff));
+        when(staffRepository.findById(mockStaff.getId())).thenReturn(Optional.of(mockStaff));
 
         assertThatThrownBy(() -> service.createPayInfo(null, mockStaff.getId()))
                 .isInstanceOf(NoneSelectedBookToReturnException.class);
 
         verify(staffRepository, times(1)).findById(1);
+
+        verifyNoMoreInteractions(staffRepository);
+        verifyNoInteractions(repository);
+        verifyNoInteractions(rentedBookRepository);
     }
 
 
@@ -174,6 +187,10 @@ public class BillServiceTest {
             verify(rentedBookRepository, times(1)).findById(b.getId());
         }
         verify(rentedBookRepository, times(1)).saveAllAndFlush(mockBooks);
+
+        verifyNoInteractions(staffRepository);
+        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(rentedBookRepository);
     }
 
 
@@ -195,8 +212,10 @@ public class BillServiceTest {
                 .isInstanceOf(FailedToPayException.class);
 
         verify(repository, times(1)).save(mock);
-        verify(rentedBookRepository, times(0)).findById(anyInt());
-        verify(rentedBookRepository, times(0)).saveAllAndFlush(anyList());
+
+        verifyNoInteractions(staffRepository);
+        verifyNoMoreInteractions(repository);
+        verifyNoInteractions(rentedBookRepository);
     }
 
 
@@ -235,7 +254,10 @@ public class BillServiceTest {
 
         verify(repository, times(1)).save(mock);
         verify(rentedBookRepository, times(index)).findById(anyInt());
-        verify(rentedBookRepository, times(0)).saveAllAndFlush(anyList());
+
+        verifyNoInteractions(staffRepository);
+        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(rentedBookRepository);
     }
 
 
@@ -270,6 +292,10 @@ public class BillServiceTest {
             verify(rentedBookRepository, times(1)).findById(b.getId());
         }
         verify(rentedBookRepository, times(1)).saveAllAndFlush(mockBooks);
+
+        verifyNoInteractions(staffRepository);
+        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(rentedBookRepository);
     }
 
 
@@ -286,9 +312,9 @@ public class BillServiceTest {
         assertThatThrownBy(() -> service.saveBillInfo(mockBill))
                 .isInstanceOf(NoneSelectedBookToReturnException.class);
 
-        verify(repository, times(0)).save(any());
-        verify(rentedBookRepository, times(0)).findById(anyInt());
-        verify(rentedBookRepository, times(0)).saveAllAndFlush(anyList());
+        verifyNoInteractions(staffRepository);
+        verifyNoInteractions(repository);
+        verifyNoInteractions(rentedBookRepository);
     }
 
 
@@ -303,9 +329,9 @@ public class BillServiceTest {
         assertThatThrownBy(() -> service.saveBillInfo(mockBill))
                 .isInstanceOf(NoneSelectedBookToReturnException.class);
 
-        verify(repository, times(0)).save(any());
-        verify(rentedBookRepository, times(0)).findById(anyInt());
-        verify(rentedBookRepository, times(0)).saveAllAndFlush(anyList());
+        verifyNoInteractions(staffRepository);
+        verifyNoInteractions(repository);
+        verifyNoInteractions(rentedBookRepository);
     }
     
 }

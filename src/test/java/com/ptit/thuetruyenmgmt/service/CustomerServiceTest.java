@@ -21,15 +21,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 
 @SpringBootTest
 public class CustomerServiceTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CustomerServiceTest.class);
 
     @Mock
     private CustomerRepository repository;
@@ -64,7 +61,8 @@ public class CustomerServiceTest {
 
         assertIterableEquals(receivedCustomers, mockCustomers);
 
-        verify(repository).findByName(mockKeyword);
+        verify(repository, times(1)).findByName(mockKeyword);
+        verifyNoMoreInteractions(repository);
     }
 
 
@@ -82,7 +80,8 @@ public class CustomerServiceTest {
         List<Customer> receivedCustomers = service.getCustomerByName(mockKeyword);
         assertEquals(0, receivedCustomers.size());
 
-        verify(repository).findByName(mockKeyword);
+        verify(repository, times(1)).findByName(mockKeyword);
+        verifyNoMoreInteractions(repository);
     }
 
 
@@ -100,7 +99,8 @@ public class CustomerServiceTest {
 
         assertEquals(received, mock);
 
-        verify(repository).findById(1);
+        verify(repository, times(1)).findById(1);
+        verifyNoMoreInteractions(repository);
     }
 
 
@@ -111,12 +111,13 @@ public class CustomerServiceTest {
      */
     @Test
     void whenGetCustomerById_shouldThrowNotFoundException() {
-        when(repository.findById(1)).thenReturn(Optional.ofNullable(null));
+        when(repository.findById(1)).thenReturn(Optional.empty());
 
         Assertions.assertThatThrownBy(() -> service.getCustomerById(1))
                 .isInstanceOf(NotFoundException.class);
 
-        verify(repository).findById(1);
+        verify(repository, times(1)).findById(1);
+        verifyNoMoreInteractions(repository);
     }
 
 }
