@@ -66,7 +66,7 @@ public class RentedBook implements Serializable {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         RentedBook that = (RentedBook) o;
-        return id != null && Objects.equals(id, that.id);
+        return (id == null && ((Penalty) o).getId() == null) || id != null && Objects.equals(id, that.id);
     }
 
     @Override

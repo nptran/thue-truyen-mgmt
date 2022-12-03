@@ -45,7 +45,7 @@ public class Penalty implements Serializable {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Penalty penalty = (Penalty) o;
-        return id != null && Objects.equals(id, penalty.id);
+        return (id == null && penalty.id == null) || (id != null && Objects.equals(id, penalty.id));
     }
 
     @Override

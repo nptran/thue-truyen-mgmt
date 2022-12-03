@@ -448,7 +448,17 @@ public class RentedBookControllerTest {
                         get("/rented-book/{id}/penalties", book.getId())) // Đầu truyện mã 1
                 .andExpect(status().isOk())
                 .andExpect(view().name("gd-cap-nhat-loi-truyen"))  // Mong đợi trả về gd này
-                .andExpect(model().attribute("rentedBook", is(expectedDto))) // Kiểm tra object trong form
+                // Kiểm tra object trong form
+                .andExpect(model().attribute("rentedBook",
+                        hasProperty("customerId", is(expectedDto.getCustomerId()))))
+                .andExpect(model().attribute("rentedBook",
+                        hasProperty("rentedBookId", is(expectedDto.getRentedBookId()))))
+                .andExpect(model().attribute("rentedBook",
+                        hasProperty("code", is(expectedDto.getCode()))))
+                .andExpect(model().attribute("rentedBook",
+                        hasProperty("titleName", is(expectedDto.getTitleName()))))
+                .andExpect(model().attribute("rentedBook",
+                        hasProperty("penalties", containsInAnyOrder(expectedDto.getPenalties().toArray()))))
                 .andExpect(model().attribute("allPenalties", is(ALL_PENALTIES)));
 
         verify(service, times(1)).getRentedBookById(book.getId());
