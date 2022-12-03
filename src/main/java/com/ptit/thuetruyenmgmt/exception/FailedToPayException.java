@@ -1,6 +1,5 @@
 package com.ptit.thuetruyenmgmt.exception;
 
-@SuppressWarnings("serial")
 public class FailedToPayException extends RuntimeException {
 
     public FailedToPayException() {

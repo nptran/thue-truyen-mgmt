@@ -1,6 +1,5 @@
 package com.ptit.thuetruyenmgmt.controller;
 
-import com.ptit.thuetruyenmgmt.exception.EmptyResultException;
 import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.Penalty;
 import com.ptit.thuetruyenmgmt.model.RentedBook;
