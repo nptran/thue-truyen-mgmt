@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.doNothing;
 
@@ -59,6 +60,9 @@ public class RentedBookServiceTest {
         Assertions.assertIterableEquals(received, mock);
 
         verify(repository, times(1)).findAllByCustomer_IdAndIsPaidIsFalse(1);
+
+        verifyNoMoreInteractions(repository);
+        verifyNoInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -76,6 +80,9 @@ public class RentedBookServiceTest {
         Assertions.assertIterableEquals(received, new ArrayList<>());
 
         verify(repository, times(1)).findAllByCustomer_IdAndIsPaidIsFalse(1);
+
+        verifyNoMoreInteractions(repository);
+        verifyNoInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -109,6 +116,9 @@ public class RentedBookServiceTest {
 
         verify(repository, times(1)).findById(1);
         verify(rentedBookPenaltyRepository, times(1)).findAllByRentedBook_Id(1);
+
+        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -135,6 +145,9 @@ public class RentedBookServiceTest {
 
         verify(repository, times(1)).findById(1);
         verify(rentedBookPenaltyRepository, times(1)).findAllByRentedBook_Id(1);
+
+        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -145,12 +158,15 @@ public class RentedBookServiceTest {
      */
     @Test
     void whenGetRentedBookById_notFoundRentedBook() {
-        when(repository.findById(1)).thenReturn(Optional.ofNullable(null));
+        when(repository.findById(1)).thenReturn(Optional.empty());
 
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.getRentedBookById(1))
+        assertThatThrownBy(() -> service.getRentedBookById(1))
                 .isInstanceOf(NotFoundException.class);
 
         verify(repository, times(1)).findById(1);
+
+        verifyNoMoreInteractions(repository);
+        verifyNoInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -175,6 +191,9 @@ public class RentedBookServiceTest {
         for (int id : ids) {
             verify(repository, times(1)).findById(id);
         }
+
+        verifyNoMoreInteractions(repository);
+        verifyNoInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -199,6 +218,9 @@ public class RentedBookServiceTest {
         for (int id : ids) {
             verify(repository, times(1)).findById(id);
         }
+
+        verifyNoMoreInteractions(repository);
+        verifyNoInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -223,6 +245,22 @@ public class RentedBookServiceTest {
         for (int id : ids) {
             verify(repository, times(1)).findById(id);
         }
+        verifyNoMoreInteractions(repository);
+        verifyNoInteractions(rentedBookPenaltyRepository);
+    }
+
+    @Test
+    void whenGetRentedBooksById_noIds() {
+        // WHEN NULL ids
+        List<RentedBook> received = service.getRentedBooksById(null);
+        assertIterableEquals(received, new ArrayList<>());
+
+        // WHEN empty Ids
+        received = service.getRentedBooksById(new ArrayList<>());
+        assertIterableEquals(received, new ArrayList<>());
+
+        verifyNoInteractions(repository);
+        verifyNoInteractions(rentedBookPenaltyRepository);
     }
 
     /**
@@ -252,6 +290,9 @@ public class RentedBookServiceTest {
         verify(rentedBookPenaltyRepository, times(1)).flush();
         verify(rentedBookPenaltyRepository, times(1)).saveAllAndFlush(penalties);
         verify(repository, times(1)).findById(1);
+
+        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -276,9 +317,9 @@ public class RentedBookServiceTest {
                 .isInstanceOf(FailedToResetBookPenaltiesException.class);
 
         verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(ids);
-        verify(rentedBookPenaltyRepository, times(0)).flush();
-        verify(rentedBookPenaltyRepository, times(0)).saveAllAndFlush(penalties);
-        verify(repository, times(0)).findById(1);
+
+        verifyNoInteractions(repository);
+        verifyNoMoreInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -301,8 +342,9 @@ public class RentedBookServiceTest {
 
         verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(ids);
         verify(rentedBookPenaltyRepository, times(1)).flush();
-        verify(rentedBookPenaltyRepository, times(0)).saveAllAndFlush(penalties);
-        verify(repository, times(0)).findById(1);
+
+        verifyNoInteractions(repository);
+        verifyNoMoreInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -330,7 +372,9 @@ public class RentedBookServiceTest {
         verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(ids);
         verify(rentedBookPenaltyRepository, times(1)).flush();
         verify(rentedBookPenaltyRepository, times(1)).saveAllAndFlush(penalties);
-        verify(repository, times(0)).findById(mock.getId());
+
+        verifyNoInteractions(repository);
+        verifyNoMoreInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -349,7 +393,7 @@ public class RentedBookServiceTest {
         doNothing().when(rentedBookPenaltyRepository).deleteAllByIdInBatch(ids);
         doNothing().when(rentedBookPenaltyRepository).flush();
         when(rentedBookPenaltyRepository.saveAllAndFlush(penalties)).thenReturn(penalties);
-        when(repository.findById(1)).thenReturn(Optional.ofNullable(null));
+        when(repository.findById(1)).thenReturn(Optional.empty());
 
         org.assertj.core.api.Assertions.assertThatThrownBy(
                         () -> service.addPenaltiesIntoRentedBook(penalties, ids, mock.getId()))
@@ -359,6 +403,9 @@ public class RentedBookServiceTest {
         verify(rentedBookPenaltyRepository, times(1)).flush();
         verify(rentedBookPenaltyRepository, times(1)).saveAllAndFlush(penalties);
         verify(repository, times(1)).findById(1);
+
+        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -382,10 +429,11 @@ public class RentedBookServiceTest {
 
         assertEquals(mock, received);
 
-        verify(rentedBookPenaltyRepository, times(0)).deleteAllByIdInBatch(currIds);
-        verify(rentedBookPenaltyRepository, times(0)).flush();
         verify(rentedBookPenaltyRepository, times(1)).saveAllAndFlush(newPenalties);
         verify(repository, times(1)).findById(mock.getId());
+
+        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -409,10 +457,11 @@ public class RentedBookServiceTest {
 
         assertEquals(mock, received);
 
-        verify(rentedBookPenaltyRepository, times(0)).deleteAllByIdInBatch(currIds);
-        verify(rentedBookPenaltyRepository, times(0)).flush();
         verify(rentedBookPenaltyRepository, times(1)).saveAllAndFlush(newPenalties);
         verify(repository, times(1)).findById(mock.getId());
+
+        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -439,8 +488,10 @@ public class RentedBookServiceTest {
 
         verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(currIds);
         verify(rentedBookPenaltyRepository, times(1)).flush();
-        verify(rentedBookPenaltyRepository, times(0)).saveAllAndFlush(newPenalties);
         verify(repository, times(1)).findById(mock.getId());
+
+        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -467,8 +518,10 @@ public class RentedBookServiceTest {
 
         verify(rentedBookPenaltyRepository, times(1)).deleteAllByIdInBatch(currIds);
         verify(rentedBookPenaltyRepository, times(1)).flush();
-        verify(rentedBookPenaltyRepository, times(0)).saveAllAndFlush(newPenalties);
         verify(repository, times(1)).findById(mock.getId());
+
+        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -488,6 +541,8 @@ public class RentedBookServiceTest {
 
         assertEquals(actual, expected);
 
+        verifyNoInteractions(repository);
+        verifyNoInteractions(rentedBookPenaltyRepository);
     }
 
     /**
@@ -499,6 +554,9 @@ public class RentedBookServiceTest {
         List<Penalty> actual = service.rentedBookPenaltiesToPenalties(null);
 
         assertEquals(actual, new ArrayList<>());
+
+        verifyNoInteractions(repository);
+        verifyNoInteractions(rentedBookPenaltyRepository);
     }
 
 
