@@ -1,6 +1,7 @@
 package com.ptit.thuetruyenmgmt.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpSession;
@@ -8,7 +9,7 @@ import javax.servlet.http.HttpSession;
 @Controller
 public class StaffController {
 
-    @RequestMapping(path = {"/", "home"})
+    @GetMapping(path = {"/", "home"})
     public String home(HttpSession session) {
         // Lưu lại các thông tin này sau khi NV đăng nhập thành công
         session.setAttribute("loginCode", "NV00651");
