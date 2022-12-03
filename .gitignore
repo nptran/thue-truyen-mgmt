@@ -1,6 +1,9 @@
 ### Draft Files ###
 src/main/java/com/ptit/thuetruyenmgmt/controller/Test.java
 
+### Lombok ###
+lombok.config
+
 ### STS ###
 .apt_generated
 .classpath
