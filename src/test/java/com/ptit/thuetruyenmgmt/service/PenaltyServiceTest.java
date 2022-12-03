@@ -19,8 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class PenaltyServiceTest {
@@ -50,7 +49,9 @@ class PenaltyServiceTest {
 
         assertEquals(received.size(), mock.size());
 
-        verify(repository).findAll();
+        verify(repository, times(1)).findAll();
+
+        verifyNoMoreInteractions(repository);
     }
 
 
@@ -67,7 +68,8 @@ class PenaltyServiceTest {
 
         assertEquals(0, received.size());
 
-        verify(repository).findAll();
+        verify(repository, times(1)).findAll();
+        verifyNoMoreInteractions(repository);
     }
 
 
@@ -85,7 +87,8 @@ class PenaltyServiceTest {
 
         assertEquals(received, mock);
 
-        verify(repository).findById(1);
+        verify(repository, times(1)).findById(1);
+        verifyNoMoreInteractions(repository);
     }
 
 
@@ -96,12 +99,13 @@ class PenaltyServiceTest {
      */
     @Test
     void whenGetCustomerById_shouldThrowNotFoundException() {
-        when(repository.findById(1)).thenReturn(Optional.ofNullable(null));
+        when(repository.findById(1)).thenReturn(Optional.empty());
 
         Assertions.assertThatThrownBy(() -> service.getPenaltyById(1))
                 .isInstanceOf(NotFoundException.class);
 
-        verify(repository).findById(1);
+        verify(repository, times(1)).findById(1);
+        verifyNoMoreInteractions(repository);
     }
 
 }
