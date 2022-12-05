@@ -1,7 +1,7 @@
 package com.ptit.thuetruyenmgmt.model.dto;
 
-import com.ptit.thuetruyenmgmt.model.EntityTest;
-import com.ptit.thuetruyenmgmt.model.Penalty;
+import com.ptit.thuetruyenmgmt.model.*;
+import com.ptit.thuetruyenmgmt.model.key.RentedBookPenaltyKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,6 +10,8 @@ import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -22,10 +24,11 @@ public class RentedBookDTOTest implements EntityTest {
     private final int expectedRentedBookId = 1;
     private final String expectedCode = "BT001";
     private final String expectedTitleName = "Tiêu Đề";
-    private final LocalDateTime expectedRentedTime = LocalDateTime.of(2022, 10, 10, 10, 10, 10);
-    private final double expectedAmount = 2000.99;
-    private final double expectedAmountTilToday = 2000.99;
+    private final LocalDateTime expectedRentedTime = LocalDateTime.now().minusDays(2);
+    private final double expectedAmount = 2000;
+    private final double expectedAmountTilToday = 4000;
     private List<Penalty> expectedPenalties;
+    private List<RentedBookPenalty> expectedRentedBookPenalties;
 
 
     private Field customerId;
@@ -44,21 +47,35 @@ public class RentedBookDTOTest implements EntityTest {
         rentedBookDTO = new RentedBookDTO();
 
         expectedPenalties = new ArrayList<>();
-        Penalty p1 = new Penalty();
-        Field pId = p1.getClass().getDeclaredField("id");
-        pId.setAccessible(true);
-        pId.set(p1, 1);
-        Penalty p2 = new Penalty();
-        pId = p2.getClass().getDeclaredField("id");
-        pId.setAccessible(true);
-        pId.set(p2, 2);
-        Penalty p3 = new Penalty();
-        pId = p3.getClass().getDeclaredField("id");
-        pId.setAccessible(true);
-        pId.set(p3, 3);
+        Penalty p1 = Penalty.builder()
+                .id(1)
+                .recommendedFee(1000)
+                .build();
+        Penalty p2 = Penalty.builder()
+                .id(2)
+                .recommendedFee(2000)
+                .build();
+        Penalty p3 = Penalty.builder()
+                .id(3)
+                .recommendedFee(3000)
+                .build();
         expectedPenalties.add(p1);
         expectedPenalties.add(p2);
         expectedPenalties.add(p3);
+
+        expectedRentedBookPenalties = new ArrayList<>();
+        expectedRentedBookPenalties.add(RentedBookPenalty.builder()
+                .id(RentedBookPenaltyKey.builder().rentedBookId(expectedRentedBookId).penaltyId(p1.getId()).build())
+                .penalty(p1)
+                .build());
+        expectedRentedBookPenalties.add(RentedBookPenalty.builder()
+                .id(RentedBookPenaltyKey.builder().rentedBookId(expectedRentedBookId).penaltyId(p2.getId()).build())
+                .penalty(p2)
+                .build());
+        expectedRentedBookPenalties.add(RentedBookPenalty.builder()
+                .id(RentedBookPenaltyKey.builder().rentedBookId(expectedRentedBookId).penaltyId(p3.getId()).build())
+                .penalty(p3)
+                .build());
 
         customerId = rentedBookDTO.getClass().getDeclaredField("customerId");
         rentedBookId = rentedBookDTO.getClass().getDeclaredField("rentedBookId");
@@ -122,7 +139,7 @@ public class RentedBookDTOTest implements EntityTest {
         rentedBookDTO.setTitleName(expectedTitleName);
         rentedBookDTO.setRentedTime(expectedRentedTime);
         rentedBookDTO.setAmount(expectedAmount);
-        rentedBookDTO.setAmount(expectedAmountTilToday);
+        rentedBookDTO.setAmountTilToday(expectedAmountTilToday);
         rentedBookDTO.setPenalties(expectedPenalties);
 
         assertFields(false);
@@ -137,7 +154,7 @@ public class RentedBookDTOTest implements EntityTest {
         titleName.set(rentedBookDTO, expectedTitleName);
         rentedTime.set(rentedBookDTO, expectedRentedTime);
         amount.set(rentedBookDTO, expectedAmount);
-        amount.set(rentedBookDTO, expectedAmountTilToday);
+        amountTilToday.set(rentedBookDTO, expectedAmountTilToday);
         penalties.set(rentedBookDTO, expectedPenalties);
 
         assertFields(true);
@@ -167,7 +184,7 @@ public class RentedBookDTOTest implements EntityTest {
             assertEquals(expectedTitleName, titleName.get(rentedBookDTO));
             assertEquals(expectedRentedTime, rentedTime.get(rentedBookDTO));
             assertEquals(expectedAmount, amount.get(rentedBookDTO));
-            assertEquals(expectedAmountTilToday, amount.get(rentedBookDTO));
+            assertEquals(expectedAmountTilToday, amountTilToday.get(rentedBookDTO));
             assertEquals(expectedPenalties, penalties.get(rentedBookDTO));
             return;
         }
@@ -178,8 +195,117 @@ public class RentedBookDTOTest implements EntityTest {
         assertEquals(expectedTitleName, rentedBookDTO.getTitleName());
         assertEquals(expectedRentedTime, rentedBookDTO.getRentedTime());
         assertEquals(expectedAmount, rentedBookDTO.getAmount());
-        assertEquals(expectedAmountTilToday, rentedBookDTO.getAmount());
+        assertEquals(expectedAmountTilToday, rentedBookDTO.getAmountTilToday());
         assertEquals(expectedPenalties, rentedBookDTO.getPenalties());
     }
+
+    @Test
+    public void testRentedBooksToRentedBookDTOsAndCalculateAmountTilToday_whenHasPenalties() {
+        List<RentedBook> rentedBooks = mockRentedBooks(1, 3, true, expectedRentedTime);
+        List<RentedBookDTO> rentedBookDTOs = RentedBookDTO.rentedBooksToRentedBookDTOs(rentedBooks);
+
+        for (RentedBookDTO dto : rentedBookDTOs) {
+            assertEquals(expectedCustomerId, dto.getCustomerId());
+            assertEquals(rentedBookDTOs.indexOf(dto)+1, dto.getRentedBookId());
+            assertEquals(expectedCode, dto.getCode());
+            assertEquals(expectedTitleName, dto.getTitleName());
+            assertEquals(expectedRentedTime, dto.getRentedTime());
+            assertEquals(expectedAmount, dto.getAmount());
+            assertEquals(expectedAmountTilToday, dto.getAmountTilToday());
+            assertEquals(expectedPenalties, dto.getPenalties());
+        }
+    }
+
+
+    @Test
+    public void testRentedBooksToRentedBookDTOsAndCalculateAmountTilToday_whenNoPenalties() {
+        List<RentedBook> rentedBooks = mockRentedBooks(1, 3, false, expectedRentedTime);
+        List<RentedBookDTO> rentedBookDTOs = RentedBookDTO.rentedBooksToRentedBookDTOs(rentedBooks);
+
+        for (RentedBookDTO dto : rentedBookDTOs) {
+            assertEquals(expectedCustomerId, dto.getCustomerId());
+            assertEquals(rentedBookDTOs.indexOf(dto)+1, dto.getRentedBookId());
+            assertEquals(expectedCode, dto.getCode());
+            assertEquals(expectedTitleName, dto.getTitleName());
+            assertEquals(expectedRentedTime, dto.getRentedTime());
+            assertEquals(expectedAmount, dto.getAmount());
+            assertEquals(expectedAmountTilToday, dto.getAmountTilToday());
+            assertEquals(new ArrayList<>(), dto.getPenalties());
+        }
+    }
+
+
+    @Test
+    public void testRentedBooksToRentedBookDTOsAndCalculateAmountTilToday_whenRentedTimeLessThanOneDay() {
+        LocalDateTime mockRentedTime = LocalDateTime.now();
+        List<RentedBook> rentedBooks = mockRentedBooks(1, 3, true, mockRentedTime);
+        List<RentedBookDTO> rentedBookDTOs = RentedBookDTO.rentedBooksToRentedBookDTOs(rentedBooks);
+
+        for (RentedBookDTO dto : rentedBookDTOs) {
+            assertEquals(expectedCustomerId, dto.getCustomerId());
+            assertEquals(rentedBookDTOs.indexOf(dto)+1, dto.getRentedBookId());
+            assertEquals(expectedCode, dto.getCode());
+            assertEquals(expectedTitleName, dto.getTitleName());
+            assertEquals(mockRentedTime, dto.getRentedTime());
+            assertEquals(expectedAmount, dto.getAmount());
+            assertEquals(expectedAmount, dto.getAmountTilToday()); // Mong đợi tiền thuê tối thiểu là 1 ngày
+            assertEquals(expectedPenalties, dto.getPenalties());
+        }
+    }
+
+
+    private List<RentedBook> mockRentedBooks(int fromID, int toID, boolean hasPenalties, LocalDateTime rentedTime) {
+        BookTitle seed = BookTitle.builder()
+                .code(expectedCode)
+                .titleName(expectedTitleName)
+                .build();
+        if (hasPenalties)
+            return IntStream.range(fromID, toID + 1)
+                    .mapToObj(i -> RentedBook.builder()
+                            .id(i)
+                            .bookTitle(seed)
+                            .customer(Customer.builder().id(expectedCustomerId).build())
+                            .rentedTime(rentedTime)
+                            .amount(expectedAmount)
+                            .penalties(expectedRentedBookPenalties)
+                            .build()
+                    ).collect(Collectors.toList());
+
+        return IntStream.range(fromID, toID + 1)
+                .mapToObj(i -> RentedBook.builder()
+                        .id(i)
+                        .bookTitle(seed)
+                        .customer(Customer.builder().id(expectedCustomerId).build())
+                        .rentedTime(rentedTime)
+                        .amount(expectedAmount)
+                        .build()
+                ).collect(Collectors.toList());
+    }
+
+//    private List<Penalty> mockListOfPenalties(int fromPenID, int toPenID, double fee, boolean idNull) {
+//        return IntStream.range(fromPenID, toPenID + 1)
+//                .mapToObj(i -> Penalty.builder()
+//                        .id(idNull ? null : i)
+//                        .name("Lỗi")
+//                        .description("")
+//                        .recommendedFee(fee)
+//                        .build()
+//                ).collect(Collectors.toList());
+//    }
+//
+//    private List<RentedBookPenalty> mockListOfRentedBookPenalties(int bookID, int fromPenID, int toPenID, double fee) {
+//        return IntStream.range(fromPenID, toPenID + 1)
+//                .mapToObj(i -> RentedBookPenalty.builder()
+//                        .id(new RentedBookPenaltyKey(bookID, i))
+//                        .fee(fee)
+//                        .penalty(Penalty.builder()
+//                                .id(i)
+//                                .name("Lỗi")
+//                                .description("")
+//                                .recommendedFee(fee)
+//                                .build())
+//                        .build()
+//                ).collect(Collectors.toList());
+//    }
 
 }

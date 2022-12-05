@@ -37,9 +37,10 @@ public class RentedBookDTO implements Serializable {
     public static List<RentedBookDTO> rentedBooksToRentedBookDTOs(List<RentedBook> rentedBooks) {
         List<RentedBookDTO> rentedBookDtos = new ArrayList<>();
         for (RentedBook book : rentedBooks) {
-            List<Penalty> penaltiesOfBook = book.getPenalties() == null ? new ArrayList<>() : rentedBookPenaltiesToPenalties(book.getPenalties());
+            List<Penalty> penaltiesOfBook = rentedBookPenaltiesToPenalties(book.getPenalties());
 
             RentedBookDTO pobDto = RentedBookDTO.builder()
+                    .customerId(book.getCustomer().getId())
                     .rentedBookId(book.getId())
                     .code(book.getBookTitle().getCode())
                     .titleName(book.getBookTitle().getTitleName())
