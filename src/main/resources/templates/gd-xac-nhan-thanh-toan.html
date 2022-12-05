@@ -13,6 +13,7 @@
                th:text="${'Tên khách hàng: '+customerInfo?.fullName+' - SĐT: '+customerInfo?.phone}"></p><br>
             <p style="color: cadetblue;font-size: initial;"
                th:text="${'Địa chỉ: '+customerInfo?.address}"></p><br>
+            <p style="color: cadetblue;font-size: initial;" th:text="${'Ngày Trả: '+ #dates.format(#dates.createNow(), 'dd-MM-yyyy')}"></p><br>
             <p style="color: cadetblue;font-size: initial;"
                th:text="${'Thời điểm thanh toán: '+bill?.createTime}"></p><br>
         </div>
@@ -81,7 +82,7 @@
                                 <td th:text="${iterStat.count}"></td>
                                 <td th:text="${book?.bookTitle?.code}"></td>
                                 <td th:text="${book?.bookTitle?.titleName}"></td>
-                                <td th:text="${book?.rentedTime}"></td>
+                                <td th:text="${#temporals.format(book?.rentedTime, 'dd/MM/yyyy HH:mm')}"></td>
                                 <td th:text="${#numbers.formatCurrency(book?.amount)}"></td>
                                 <td th:text="${#numbers.formatCurrency(rentedBookDTOs[__${iterStat.index}__].amountTilToday)}"></td>
                                 <td>

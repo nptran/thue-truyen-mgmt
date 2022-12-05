@@ -1,6 +1,7 @@
 package com.ptit.thuetruyenmgmt.controller;
 
 import com.ptit.thuetruyenmgmt.exception.NotFoundException;
+import com.ptit.thuetruyenmgmt.model.Customer;
 import com.ptit.thuetruyenmgmt.model.Penalty;
 import com.ptit.thuetruyenmgmt.model.RentedBook;
 import com.ptit.thuetruyenmgmt.model.RentedBookPenalty;
@@ -8,6 +9,7 @@ import com.ptit.thuetruyenmgmt.model.key.RentedBookPenaltyKey;
 import com.ptit.thuetruyenmgmt.model.dto.RentedBookDTO;
 import com.ptit.thuetruyenmgmt.model.dto.ReturnRentedBookRequest;
 import com.ptit.thuetruyenmgmt.model.dto.ReadyToReturnBooks;
+import com.ptit.thuetruyenmgmt.service.CustomerService;
 import com.ptit.thuetruyenmgmt.service.PenaltyService;
 import com.ptit.thuetruyenmgmt.service.RentedBookService;
 import org.slf4j.Logger;
@@ -36,10 +38,13 @@ public class RentedBookController {
 
     private PenaltyService penaltyService;
 
+    private CustomerService customerService;
+
     @Autowired
-    public RentedBookController(RentedBookService rentedBookService, PenaltyService penaltyService) {
+    public RentedBookController(RentedBookService rentedBookService, PenaltyService penaltyService, CustomerService customerService) {
         this.service = rentedBookService;
         this.penaltyService = penaltyService;
+        this.customerService = customerService;
     }
 
 
@@ -50,8 +55,16 @@ public class RentedBookController {
      * @return
      */
     @GetMapping("/customer/rented-books={id}")
-    public ModelAndView getGDRentedBooks(@PathVariable Integer id, HttpSession session) {
+    public ModelAndView getGDRentedBooks(@PathVariable Integer id, HttpSession session, RedirectAttributes redirect) {
         session.setAttribute("customerId", id);
+        Customer customer;
+        try {
+            customer = customerService.getCustomerById(id);
+        } catch (NotFoundException e) {
+            redirect.addFlashAttribute("errorNoti", "Khách hàng không tồn tại!");
+            return new ModelAndView("redirect:/customer");
+        }
+
         ModelAndView mav = new ModelAndView("gd-truyen-kh");
         List<RentedBook> allRentedBooks = service.getRentedBooksByCustomer(id);
         List<RentedBookDTO> allRentedBooksInfo = RentedBookDTO.rentedBooksToRentedBookDTOs(allRentedBooks);
@@ -62,7 +75,7 @@ public class RentedBookController {
         mav.addObject("searchKw", searchKw);
         mav.addObject("selectedBooks", wrapper);
         mav.addObject("allRentedBooks", allRentedBooksInfo);
-        mav.addObject("returnTime", LocalDate.now());
+        mav.addObject("customerInfo", customer);
         return mav;
     }
 
@@ -105,7 +118,15 @@ public class RentedBookController {
      */
     @GetMapping(value = "/rented-book/selected-of={id}")
     public ModelAndView getGDTraTruyen(@PathVariable("id") Integer customerId,
-                                       HttpSession session) {
+                                       HttpSession session, RedirectAttributes redirect) {
+        Customer customer;
+        try {
+            customer = customerService.getCustomerById(customerId);
+        } catch (NotFoundException e) {
+            redirect.addFlashAttribute("errorNoti", "Khách hàng không tồn tại!");
+            return new ModelAndView("redirect:/customer");
+        }
+
         ModelAndView mav = new ModelAndView("gd-tra-truyen");
 
         // Lấy ra danh sách các truyện đã chọn từ session
@@ -117,6 +138,7 @@ public class RentedBookController {
         List<RentedBookDTO> selectedBookDtos = RentedBookDTO.rentedBooksToRentedBookDTOs(selectedBooks);
         mav.addObject("returnBookReq", new ReturnRentedBookRequest(customerId, selectedBookDtos));
         mav.addObject("allPenalties", penaltyService.getAllPenalties());
+        mav.addObject("customerInfo", customer);
 
         return mav;
     }

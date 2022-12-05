@@ -55,3 +55,12 @@
 	border: 1px solid #ff0000;
 	margin-bottom: 10px;	
 }
+
+.customer-info-panel {
+	text-align: left;
+}
+
+.customer-info-panel span {
+	color: #33383b !important;
+	margin: 10px !important;
+}

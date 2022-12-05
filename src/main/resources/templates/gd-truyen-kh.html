@@ -6,65 +6,79 @@
     <nav th:replace="fragments/layout :: header"></nav>
     <div class="hero list" style="margin: 0px auto 20px auto;">
         <h1 style="color: #313131;">Danh Sách Truyện Đang Mượn</h1>
-        <div th:if="${returnNothing}" class="row alert alert-error alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert"
-                    aria-label="Close">
-                <span aria-hidden="true">×</span>
-            </button>
-            <span th:text="${returnNothing}"></span>
-        </div>
-        <form action="#"
-              th:object="${selectedBooks}"
-              th:action="@{/rented-book/selectToReturn-of={id}(id=*{customerId})}" method="POST">
-            <input class="form-control" type="hidden" name="customerId" th:value="*{customerId}"/>
-            <div class="row">
-                <a th:href="@{/customer/search(kw-name=${searchKw})}" class="btn btn-warning pull-left">
-                    <span class="fas fa-backward"></span> Quay Lại
-                </a>
-                <button type="submit" class="btn btn-success pull-right">Trả Truyện</button>
+        <div class="row">
+            <div th:if="${returnNothing}" class="row alert alert-error alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert"
+                        aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <span th:text="${returnNothing}"></span>
             </div>
+        </div>
 
-            <!-- BẢNG DS ĐẦU TRUYỆN ĐANG MƯỢN -->
-            <!-- NẾU KẾT QUẢ TRỐNG -->
-            <th:block th:if="${#lists.isEmpty(allRentedBooks)}">
-                <h3>Danh sách trống! Khách hàng đang không mượn truyện nào!</h3>
-            </th:block>
+        <div class="row pull-left customer-info-panel">
+            <span th:text="${'Mã KH: '+ customerInfo?.id}"></span>
+            <span th:text="${'Tên khách hàng: '+ customerInfo?.fullName}"></span>
+            <span th:text="${'SĐT: '+ customerInfo?.phone}"></span>
+            <span th:text="${'Địa chỉ: '+ customerInfo?.address}"></span>
+            <span th:text="${'Ngày Trả: '+ #dates.format(#dates.createNow(), 'dd-MM-yyyy')}"></span>
+        </div>
 
-            <!-- NẾU CÓ KẾT QUẢ -->
-            <th:block th:unless="${#lists.isEmpty(allRentedBooks)}">
+        <div class="row">
+            <form action="#"
+                  th:object="${selectedBooks}"
+                  th:action="@{/rented-book/selectToReturn-of={id}(id=*{customerId})}" method="POST">
+                <input class="form-control" type="hidden" name="customerId" th:value="*{customerId}"/>
                 <div class="row">
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Mã</th>
-                            <th>Tên Đầu Truyện</th>
-                            <th>Ngày Mượn</th>
-                            <th>Giá Thuê (Ngày)</th>
-                            <th>Tiền Thuê</th>
-                            <th>Chọn Trả</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <th:block th:each="book,iterStat : ${allRentedBooks}">
-                            <tr class="form-group">
-                                <td th:text="${iterStat.count}"></td>
-                                <td th:text="${book?.code}"></td>
-                                <td th:text="${book?.titleName}"></td>
-                                <td th:text="${book?.rentedTime}"></td>
-                                <td th:text="${#numbers.formatCurrency(book?.amount)}"></td>
-                                <td th:text="${#numbers.formatCurrency(book?.amountTilToday)}"></td>
-                                <td><input class="form-control" type="checkbox" name="willBeReturnedBooks" th:field="*{willBeReturnedBooks}" th:value="${book.rentedBookId}"/></td>
-                                <!--            <td><a th:href="@{/student/{id}/delete(id=${customer.id})}"><span-->
-                                <!--                    class="glyphicon glyphicon-trash"></span></a></td>-->
-                            </tr>
-                        </th:block>
-
-                        </tbody>
-                    </table>
+                    <a th:href="@{/customer/search(kw-name=${searchKw})}" class="btn btn-warning pull-left">
+                        <span class="fas fa-backward"></span> Quay Lại
+                    </a>
+                    <button type="submit" class="btn btn-success pull-right">Trả Truyện</button>
                 </div>
-            </th:block>
-        </form>
+
+                <!-- BẢNG DS ĐẦU TRUYỆN ĐANG MƯỢN -->
+                <!-- NẾU KẾT QUẢ TRỐNG -->
+                <th:block th:if="${#lists.isEmpty(allRentedBooks)}">
+                    <h3>Danh sách trống! Khách hàng đang không mượn truyện nào!</h3>
+                </th:block>
+
+                <!-- NẾU CÓ KẾT QUẢ -->
+                <th:block th:unless="${#lists.isEmpty(allRentedBooks)}">
+                    <div class="row">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã</th>
+                                <th>Tên Đầu Truyện</th>
+                                <th>Ngày Mượn</th>
+                                <th>Giá Thuê (Ngày)</th>
+                                <th>Tiền Thuê</th>
+                                <th>Chọn Trả</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <th:block th:each="book,iterStat : ${allRentedBooks}">
+                                <tr class="form-group">
+                                    <td th:text="${iterStat.count}"></td>
+                                    <td th:text="${book?.code}"></td>
+                                    <td th:text="${book?.titleName}"></td>
+                                    <td th:text="${#temporals.format(book?.rentedTime, 'dd-MM-yyyy HH:mm')}"></td>
+                                    <td th:text="${#numbers.formatCurrency(book?.amount)}"></td>
+                                    <td th:text="${#numbers.formatCurrency(book?.amountTilToday)}"></td>
+                                    <td><input class="form-control" type="checkbox" name="willBeReturnedBooks"
+                                               th:field="*{willBeReturnedBooks}" th:value="${book.rentedBookId}"/></td>
+                                    <!--            <td><a th:href="@{/student/{id}/delete(id=${customer.id})}"><span-->
+                                    <!--                    class="glyphicon glyphicon-trash"></span></a></td>-->
+                                </tr>
+                            </th:block>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </th:block>
+            </form>
+        </div>
     </div>
     <footer th:replace="fragments/layout :: footer"></footer>
 </div>

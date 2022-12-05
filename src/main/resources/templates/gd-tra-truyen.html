@@ -7,83 +7,94 @@
     <div class="hero list" style="margin: 0px auto 20px auto;">
         <h1 style="color: #313131;">Trả Truyện</h1>
 
-        <div th:if="${savePenaltiesSuccess}" class="row alert alert-success alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert"
-                    aria-label="Close">
-                <span aria-hidden="true">×</span>
-            </button>
-            <span th:text="${savePenaltiesSuccess}"></span>
+        <div class="row">
+            <div th:if="${savePenaltiesSuccess}" class="row alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert"
+                        aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <span th:text="${savePenaltiesSuccess}"></span>
+            </div>
+        </div>
+        <div class="row pull-left customer-info-panel">
+            <span th:text="${'Mã KH: '+ customerInfo?.id}"></span>
+            <span th:text="${'Tên khách hàng: '+ customerInfo?.fullName}"></span>
+            <span th:text="${'SĐT: '+ customerInfo?.phone}"></span>
+            <span th:text="${'Địa chỉ: '+ customerInfo?.address}"></span>
+            <span th:text="${'Ngày Trả: '+ #dates.format(#dates.createNow(), 'dd-MM-yyyy')}"></span>
         </div>
 
-        <form action="#"
-              th:object="${returnBookReq}"
-              th:action="@{/customer/check-bill}" method="POST">
-            <input class="form-control" type="hidden" name="customerId" th:value="*{customerId}"/>
-            <div class="row">
-                <a th:href="@{/customer/rented-books={id}(id=*{customerId})}" class="btn btn-warning pull-left">
-                    <span class="fas fa-backward"></span> Quay Lại
-                </a>
-                <button type="submit" class="btn btn-success pull-right">Thanh Toán</button>
-            </div>
-
-            <!-- BẢNG DS ĐẦU TRUYỆN ĐANG MƯỢN -->
-            <!-- NẾU KẾT QUẢ TRỐNG -->
-            <th:block th:if="${#lists.isEmpty(returnBookReq.rentedBookDtos)}">
-                <h3>Chưa có Đầu Truyện nào được chọn! Hãy
-                    <a th:href="@{/customer/rented-books={id}(id=*{customerId})}">
-                        quay lại và chọn truyện cần trả
-                    </a> trước đã!
-                </h3>
-            </th:block>
-            <th:block th:if="${#lists.isEmpty(allPenalties)}">
-                <h3>Danh sách Lỗi truyện trống! Thêm ngay!</h3>
-            </th:block>
-
-            <!-- NẾU CÓ KẾT QUẢ -->
-            <th:block th:unless="${#lists.isEmpty(returnBookReq.rentedBookDtos)}">
+        <div class="row">
+            <form action="#"
+                  th:object="${returnBookReq}"
+                  th:action="@{/customer/check-bill}" method="POST">
+                <input class="form-control" type="hidden" name="customerId" th:value="*{customerId}"/>
                 <div class="row">
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Mã</th>
-                            <th>Tên Đầu Truyện</th>
-                            <th>Ngày Mượn</th>
-                            <th>Giá Thuê (Ngày)</th>
-                            <th>Tiền Thuê</th>
-                            <th>Lỗi Truyện Hiện Tại</th>
-                            <th>Cập Nhật Lỗi Truyện</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="book,iterStat : ${returnBookReq.rentedBookDtos}" class="form-group">
-                            <td th:text="${iterStat.count}"></td>
-                            <td th:text="${book.code}"></td>
-                            <td th:text="${book.titleName}"></td>
-                            <td th:text="${book.rentedTime.toString()}"></td>
-                            <td th:text="${#numbers.formatCurrency(book.amount)}"></td>
-                            <td th:text="${#numbers.formatCurrency(book.amountTilToday)}"></td>
-                            <td>
-                                <ul class="list-group">
-                                    <li class="list-group-item" th:each="p, stat : ${book.penalties}"
-                                        th:text="${p.name + ': ' + #numbers.formatCurrency(p.recommendedFee)}">
-                                    </li>
-                                </ul>
-                            </td>
-                            <td>
-                                <!--                                <button type="submit" name="action" value="${book.rentedBookId}" class="btn btn-success">Cập Nhật</button>-->
-                                <a th:href="@{/rented-book/{id}/penalties(id=${book.rentedBookId})}"
-                                   class="btn btn-success">
-                                    <span class="fas fa-plus"></span> Cập Nhật
-                                </a>
-                            </td>
-                        </tr>
-
-                        </tbody>
-                    </table>
+                    <a th:href="@{/customer/rented-books={id}(id=*{customerId})}" class="btn btn-warning pull-left">
+                        <span class="fas fa-backward"></span> Quay Lại
+                    </a>
+                    <button type="submit" class="btn btn-success pull-right">Thanh Toán</button>
                 </div>
-            </th:block>
-        </form>
+
+                <!-- BẢNG DS ĐẦU TRUYỆN ĐANG MƯỢN -->
+                <!-- NẾU KẾT QUẢ TRỐNG -->
+                <th:block th:if="${#lists.isEmpty(returnBookReq.rentedBookDtos)}">
+                    <h3>Chưa có Đầu Truyện nào được chọn! Hãy
+                        <a th:href="@{/customer/rented-books={id}(id=*{customerId})}">
+                            quay lại và chọn truyện cần trả
+                        </a> trước đã!
+                    </h3>
+                </th:block>
+                <th:block th:if="${#lists.isEmpty(allPenalties)}">
+                    <h3>Danh sách Lỗi truyện trống! Thêm ngay!</h3>
+                </th:block>
+
+                <!-- NẾU CÓ KẾT QUẢ -->
+                <th:block th:unless="${#lists.isEmpty(returnBookReq.rentedBookDtos)}">
+                    <div class="row">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã</th>
+                                <th>Tên Đầu Truyện</th>
+                                <th>Ngày Mượn</th>
+                                <th>Giá Thuê (Ngày)</th>
+                                <th>Tiền Thuê</th>
+                                <th>Lỗi Truyện Hiện Tại</th>
+                                <th>Cập Nhật Lỗi Truyện</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="book,iterStat : ${returnBookReq.rentedBookDtos}" class="form-group">
+                                <td th:text="${iterStat.count}"></td>
+                                <td th:text="${book.code}"></td>
+                                <td th:text="${book.titleName}"></td>
+                                <td th:text="${#temporals.format(book?.rentedTime, 'dd-MM-yyyy HH:mm')}"></td>
+                                <td th:text="${#numbers.formatCurrency(book.amount)}"></td>
+                                <td th:text="${#numbers.formatCurrency(book.amountTilToday)}"></td>
+                                <td>
+                                    <ul class="list-group">
+                                        <li class="list-group-item" th:each="p, stat : ${book.penalties}"
+                                            th:text="${p.name + ': ' + #numbers.formatCurrency(p.recommendedFee)}">
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <!--                                <button type="submit" name="action" value="${book.rentedBookId}" class="btn btn-success">Cập Nhật</button>-->
+                                    <a th:href="@{/rented-book/{id}/penalties(id=${book.rentedBookId})}"
+                                       class="btn btn-success">
+                                        <span class="fas fa-plus"></span> Cập Nhật
+                                    </a>
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </th:block>
+            </form>
+        </div>
     </div>
     <footer th:replace="fragments/layout :: footer"></footer>
 </div>
