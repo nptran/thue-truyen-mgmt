@@ -1,9 +1,8 @@
 package com.ptit.thuetruyenmgmt.entity.dto;
 
 import com.ptit.thuetruyenmgmt.entity.EntityTest;
-import com.ptit.thuetruyenmgmt.model.RentedBook;
-import com.ptit.thuetruyenmgmt.model.request.RentedBookDTO;
-import com.ptit.thuetruyenmgmt.model.request.ReturnRentedBookRequest;
+import com.ptit.thuetruyenmgmt.model.dto.RentedBookDTO;
+import com.ptit.thuetruyenmgmt.model.dto.ReturnRentedBookRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

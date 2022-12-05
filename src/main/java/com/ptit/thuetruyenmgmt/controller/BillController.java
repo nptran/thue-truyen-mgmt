@@ -4,6 +4,7 @@ import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.Bill;
 import com.ptit.thuetruyenmgmt.model.Customer;
 import com.ptit.thuetruyenmgmt.model.RentedBook;
+import com.ptit.thuetruyenmgmt.model.dto.RentedBookDTO;
 import com.ptit.thuetruyenmgmt.service.BillService;
 import com.ptit.thuetruyenmgmt.service.CustomerService;
 import com.ptit.thuetruyenmgmt.service.RentedBookService;
@@ -55,8 +56,7 @@ public class BillController {
             return new ModelAndView("redirect:/customer/rented-books=" + customerId);
         }
 
-        ModelAndView mav = new ModelAndView("redirect:/customer/show-bill?customerId=" + customerId);
-        return mav;
+        return new ModelAndView("redirect:/customer/show-bill?customerId=" + customerId);
     }
 
 
@@ -91,6 +91,7 @@ public class BillController {
         }
 
         List<RentedBook> rentedBooks = rentedBookService.getRentedBooksById(bookIds);
+        List<RentedBookDTO> rentedBookDTOs = RentedBookDTO.rentedBooksToRentedBookDTOs(rentedBooks);
         if (rentedBooks.isEmpty()) {
             redirect.addFlashAttribute("returnNothing",
                     "Tạo thanh toán thất bại!!! Không có đầu truyện nào được chọn.");
@@ -104,6 +105,7 @@ public class BillController {
             mav.addObject("customerId", customerId);
             mav.addObject("customerInfo", customer);
             mav.addObject("paySuccess", false);
+            mav.addObject("rentedBookDTOs", rentedBookDTOs);
             mav.addObject("bill", billInfo);
         } catch (NotFoundException e) {
             mav = new ModelAndView("gd-chinh-nv");

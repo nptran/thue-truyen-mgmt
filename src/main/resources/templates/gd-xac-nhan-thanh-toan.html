@@ -70,7 +70,8 @@
                                 <th>Mã</th>
                                 <th>Tên Đầu Truyện</th>
                                 <th>Ngày Mượn</th>
-                                <th>Giá Thuê</th>
+                                <th>Giá Thuê (Ngày)</th>
+                                <th>Tiền Thuê</th>
                                 <th>Lỗi Truyện Hiện Tại</th>
                                 <th>Tiền Phạt</th>
                             </tr>
@@ -82,6 +83,7 @@
                                 <td th:text="${book?.bookTitle?.titleName}"></td>
                                 <td th:text="${book?.rentedTime}"></td>
                                 <td th:text="${#numbers.formatCurrency(book?.amount)}"></td>
+                                <td th:text="${#numbers.formatCurrency(rentedBookDTOs[__${iterStat.index}__].amountTilToday)}"></td>
                                 <td>
                                     <ul class="list-group">
                                         <li class="list-group-item" th:each="p, stat : ${book.penalties}"
@@ -102,7 +104,7 @@
                                 <td></td>
                                 <td></td>
                                 <th>Tổng Tiền</th>
-                                <th colspan="3" th:text="*{#numbers.formatCurrency(totalAmount)}"></th>
+                                <th colspan="4" th:text="*{#numbers.formatCurrency(totalAmount)}"></th>
                             </tr>
 
                             </tbody>

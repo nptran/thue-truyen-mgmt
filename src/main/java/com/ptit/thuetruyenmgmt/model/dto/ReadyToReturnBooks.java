@@ -1,4 +1,4 @@
-package com.ptit.thuetruyenmgmt.model.request;
+package com.ptit.thuetruyenmgmt.model.dto;
 
 import com.ptit.thuetruyenmgmt.model.RentedBook;
 import lombok.*;

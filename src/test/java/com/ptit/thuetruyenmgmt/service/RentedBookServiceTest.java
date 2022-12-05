@@ -4,7 +4,7 @@ import com.ptit.thuetruyenmgmt.exception.FailedToResetBookPenaltiesException;
 import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.*;
 import com.ptit.thuetruyenmgmt.model.key.RentedBookPenaltyKey;
-import com.ptit.thuetruyenmgmt.model.request.RentedBookDTO;
+import com.ptit.thuetruyenmgmt.model.dto.RentedBookDTO;
 import com.ptit.thuetruyenmgmt.repository.RentedBookPenaltyRepository;
 import com.ptit.thuetruyenmgmt.repository.RentedBookRepository;
 import com.ptit.thuetruyenmgmt.service.impl.RentedBookServiceImpl;

@@ -2,7 +2,7 @@ package com.ptit.thuetruyenmgmt.entity.dto;
 
 import com.ptit.thuetruyenmgmt.entity.EntityTest;
 import com.ptit.thuetruyenmgmt.model.RentedBook;
-import com.ptit.thuetruyenmgmt.model.request.ReadyToReturnBooks;
+import com.ptit.thuetruyenmgmt.model.dto.ReadyToReturnBooks;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

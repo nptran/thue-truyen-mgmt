@@ -1,4 +1,4 @@
-package com.ptit.thuetruyenmgmt.model.request;
+package com.ptit.thuetruyenmgmt.model.dto;
 
 import com.ptit.thuetruyenmgmt.model.*;
 import lombok.*;
@@ -54,6 +54,7 @@ public class RentedBookDTO implements Serializable {
         return rentedBookDtos;
     }
 
+
     public static double calculateAmountTilToday(RentedBook book) {
         double amount = book.getAmount();
         // Tính tổng số thời gian đã mượn
@@ -65,6 +66,7 @@ public class RentedBookDTO implements Serializable {
 
         return amount;
     }
+
 
     public static List<Penalty> rentedBookPenaltiesToPenalties(List<RentedBookPenalty> rentedBookPenalties) {
         List<Penalty> penalties = new ArrayList<>();

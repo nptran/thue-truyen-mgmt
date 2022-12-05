@@ -4,9 +4,8 @@ import com.ptit.thuetruyenmgmt.exception.FailedToPayException;
 import com.ptit.thuetruyenmgmt.exception.NoneSelectedBookToReturnException;
 import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.*;
-import com.ptit.thuetruyenmgmt.model.request.RentedBookDTO;
+import com.ptit.thuetruyenmgmt.model.dto.RentedBookDTO;
 import com.ptit.thuetruyenmgmt.repository.BillRepository;
-import com.ptit.thuetruyenmgmt.repository.CustomerRepository;
 import com.ptit.thuetruyenmgmt.repository.RentedBookRepository;
 import com.ptit.thuetruyenmgmt.repository.StaffRepository;
 import com.ptit.thuetruyenmgmt.service.BillService;
@@ -14,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,9 +22,6 @@ public class BillServiceImpl implements BillService {
 
     @Autowired
     private BillRepository repository;
-
-    @Autowired
-    private CustomerRepository customerRepository;
 
     @Autowired
     private RentedBookRepository rentedBookRepository;
@@ -55,7 +49,7 @@ public class BillServiceImpl implements BillService {
         LocalDateTime now = LocalDateTime.now();
         double totalAmount = 0;
         for (RentedBook book : rentedBooks) {
-            totalAmount += calculateTotalAmount(book, now);
+            totalAmount += calculateTotalAmount(book);
         }
 
         return Bill.builder()
@@ -102,13 +96,9 @@ public class BillServiceImpl implements BillService {
     }
 
 
-    private double calculateTotalAmount(RentedBook book, LocalDateTime now) {
-        double amount = book.getAmount();
-        // Tính tổng số giờ đã mượn
-        LocalDateTime rentedFrom = book.getRentedTime();
-        Duration totalTime = Duration.between(rentedFrom, now);
-        long hours = totalTime.toHours();
-        amount *= (double) hours / 24; // Chia ra nhân với giá thuê theo 24h
+    private double calculateTotalAmount(RentedBook book) {
+        // Tính tiền thuê chưa gồm phí phạt
+        double amount = RentedBookDTO.calculateAmountTilToday(book);
 
         for (RentedBookPenalty p : book.getPenalties()) {
             amount += p.getFee();
