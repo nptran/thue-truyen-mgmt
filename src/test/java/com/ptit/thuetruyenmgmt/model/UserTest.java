@@ -1,15 +1,11 @@
-package com.ptit.thuetruyenmgmt.entity;
+package com.ptit.thuetruyenmgmt.model;
 
-import com.ptit.thuetruyenmgmt.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

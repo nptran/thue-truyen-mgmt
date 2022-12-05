@@ -1,6 +1,5 @@
-package com.ptit.thuetruyenmgmt.entity;
+package com.ptit.thuetruyenmgmt.model;
 
-import com.ptit.thuetruyenmgmt.model.*;
 import com.ptit.thuetruyenmgmt.model.key.RentedBookPenaltyKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

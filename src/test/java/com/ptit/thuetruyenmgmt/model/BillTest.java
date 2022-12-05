@@ -1,6 +1,4 @@
-package com.ptit.thuetruyenmgmt.entity;
-
-import com.ptit.thuetruyenmgmt.model.*;
+package com.ptit.thuetruyenmgmt.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 

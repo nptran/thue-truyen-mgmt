@@ -1,4 +1,4 @@
-package com.ptit.thuetruyenmgmt.entity;
+package com.ptit.thuetruyenmgmt.model;
 
 
 public interface EntityTest {

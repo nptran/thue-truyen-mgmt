@@ -1,7 +1,6 @@
-package com.ptit.thuetruyenmgmt.entity.key;
+package com.ptit.thuetruyenmgmt.model.key;
 
-import com.ptit.thuetruyenmgmt.entity.EntityTest;
-import com.ptit.thuetruyenmgmt.model.key.RentedBookPenaltyKey;
+import com.ptit.thuetruyenmgmt.model.EntityTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
