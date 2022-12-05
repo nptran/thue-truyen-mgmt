@@ -55,14 +55,14 @@ public class RentedBookControllerTest {
     private Customer customer;
 
     private List<RentedBook> rentedBooksNoPenalties;
-
+    private List<RentedBookDTO> rentedBooksNoPenaltiesDTOs;
     private List<Integer> rentedBookNoPenaltiesIds;
 
     private List<RentedBook> rentedBooksHasPenalties;
-
+    private List<RentedBookDTO> rentedBooksHasPenaltiesDTOs;
     private List<Integer> rentedBookHasPenaltiesIds;
 
-    private List<RentedBook> emptyRentedBooks = new ArrayList<>();
+    private final List<RentedBook> emptyRentedBooks = new ArrayList<>();
 
     private ReadyToReturnBooks selectedBookReqHasPenalties;
 
@@ -158,6 +158,7 @@ public class RentedBookControllerTest {
         rentedBooksNoPenalties.add(book3NoPenalties);
         rentedBooksNoPenalties.add(book4NoPenalties);
         rentedBooksNoPenalties.add(book5NoPenalties);
+        rentedBooksNoPenaltiesDTOs = RentedBookDTO.rentedBooksToRentedBookDTOs(rentedBooksNoPenalties);
         rentedBookNoPenaltiesIds = new ArrayList<>();
         rentedBookNoPenaltiesIds.add(book3NoPenalties.getId());
         rentedBookNoPenaltiesIds.add(book4NoPenalties.getId());
@@ -167,6 +168,7 @@ public class RentedBookControllerTest {
         rentedBooksHasPenalties.add(book1WithPenalties);
         rentedBooksHasPenalties.add(book2WithPenalties);
         rentedBooksHasPenalties.add(book3NoPenalties);
+        rentedBooksHasPenaltiesDTOs = RentedBookDTO.rentedBooksToRentedBookDTOs(rentedBooksHasPenalties);
         rentedBookHasPenaltiesIds = new ArrayList<>();
         rentedBookHasPenaltiesIds.add(book1WithPenalties.getId());
         rentedBookHasPenaltiesIds.add(book2WithPenalties.getId());
@@ -177,8 +179,8 @@ public class RentedBookControllerTest {
         noneSelectedBookReq = new ReadyToReturnBooks(null, customer.getId());
         emptySelectedBookReq = new ReadyToReturnBooks(new ArrayList<>(), customer.getId());
 
-        selectedBookDTOReqHasPenalties = new ReturnRentedBookRequest(customer.getId(), rentedBooksToRentedBookDTOs(rentedBooksHasPenalties));
-        selectedBookDTOReqNoPenalties = new ReturnRentedBookRequest(customer.getId(), rentedBooksToRentedBookDTOs(rentedBooksNoPenalties));
+        selectedBookDTOReqHasPenalties = new ReturnRentedBookRequest(customer.getId(), RentedBookDTO.rentedBooksToRentedBookDTOs(rentedBooksHasPenalties));
+        selectedBookDTOReqNoPenalties = new ReturnRentedBookRequest(customer.getId(), RentedBookDTO.rentedBooksToRentedBookDTOs(rentedBooksNoPenalties));
         noneSelectedBookDTOReq = new ReturnRentedBookRequest(customer.getId(), null);
         emptySelectedBookDTOReq = new ReturnRentedBookRequest(customer.getId(), new ArrayList<>());
 
@@ -201,7 +203,7 @@ public class RentedBookControllerTest {
                 .andExpect(view().name("gd-truyen-kh"))
                 .andExpect(model().attribute("searchKw", kw))
                 .andExpect(model().attribute("allRentedBooks", hasSize(3))) // Có 3 đầu truyện mượn
-                .andExpect(model().attribute("allRentedBooks", is(rentedBooksHasPenalties)))
+                .andExpect(model().attribute("allRentedBooks", is(rentedBooksHasPenaltiesDTOs)))
                 .andExpect(model().attribute("selectedBooks", noneSelectedBookReq)); // Tải giao diện nên chưa có đầu truyện nào được chọn
 
         verify(service, times(1)).getRentedBooksByCustomer(customer.getId());
@@ -283,21 +285,7 @@ public class RentedBookControllerTest {
     @Test
     void whenGetGDTraTruyen_case1() throws Exception {
         // 3 truyện được chọn để trả, có lỗi
-        RentedBook b1 = rentedBooksHasPenalties.get(0);
-        RentedBook b2 = rentedBooksHasPenalties.get(1);
-        RentedBook b3 = rentedBooksHasPenalties.get(2);
-        List<Penalty> pb1 = rentedBookPenaltiesToPenalties(b1.getPenalties(), false);
-        List<Penalty> pb2 = rentedBookPenaltiesToPenalties(b2.getPenalties(), false);
-
-
         when(service.getRentedBooksById(rentedBookHasPenaltiesIds)).thenReturn(rentedBooksHasPenalties);
-
-        // book1
-        when(service.getRentedBookById(b1.getId())).thenReturn(b1);
-        // book2
-        when(service.getRentedBookById(b2.getId())).thenReturn(b2);
-        // book3 - không có lỗi
-        when(service.getRentedBookById(b3.getId())).thenReturn(b3);
 
         when(penaltyService.getAllPenalties()).thenReturn(ALL_PENALTIES);
 
@@ -310,9 +298,6 @@ public class RentedBookControllerTest {
                 .andExpect(model().attribute("allPenalties", is(ALL_PENALTIES)));
 
         verify(service, times(1)).getRentedBooksById(rentedBookHasPenaltiesIds);
-        verify(service, times(1)).getRentedBookById(b1.getId());
-        verify(service, times(1)).getRentedBookById(b2.getId());
-        verify(service, times(1)).getRentedBookById(b3.getId());
         verify(penaltyService, times(1)).getAllPenalties();
 
         verifyNoMoreInteractions(service);
@@ -328,16 +313,8 @@ public class RentedBookControllerTest {
      */
     @Test
     void whenGetGDTraTruyen_case2() throws Exception {
-        // 3 truyện được chọn để trả không có lỗi
-        RentedBook b1 = rentedBooksNoPenalties.get(0);
-        RentedBook b2 = rentedBooksNoPenalties.get(1);
-        RentedBook b3 = rentedBooksNoPenalties.get(2);
-
         // Mock 4 penalties
         when(service.getRentedBooksById(rentedBookNoPenaltiesIds)).thenReturn(rentedBooksNoPenalties);
-        when(service.getRentedBookById(b1.getId())).thenReturn(b1);
-        when(service.getRentedBookById(b2.getId())).thenReturn(b2);
-        when(service.getRentedBookById(b3.getId())).thenReturn(b3);
         when(penaltyService.getAllPenalties()).thenReturn(ALL_PENALTIES);
 
         this.mvc.perform(
@@ -349,9 +326,6 @@ public class RentedBookControllerTest {
                 .andExpect(model().attribute("allPenalties", is(ALL_PENALTIES)));
 
         verify(service, times(1)).getRentedBooksById(rentedBookNoPenaltiesIds);
-        verify(service, times(1)).getRentedBookById(b1.getId());
-        verify(service, times(1)).getRentedBookById(b2.getId());
-        verify(service, times(1)).getRentedBookById(b3.getId());
         verify(penaltyService, times(1)).getAllPenalties();
 
         verifyNoMoreInteractions(service);
@@ -844,26 +818,6 @@ public class RentedBookControllerTest {
                         .recommendedFee(fee)
                         .build()
                 ).collect(Collectors.toList());
-    }
-
-    private List<RentedBookDTO> rentedBooksToRentedBookDTOs(List<RentedBook> rentedBooks) {
-        List<RentedBookDTO> dtos = new ArrayList<>();
-        for (RentedBook book : rentedBooks) {
-            List<Penalty> currentPenalties = book.getPenalties() == null ? new ArrayList<>() : rentedBookPenaltiesToPenalties(book.getPenalties(), false);
-
-            RentedBookDTO dto =
-                    RentedBookDTO.builder()
-                            .rentedBookId(book.getId())
-                            .code(book.getBookTitle().getCode())
-                            .titleName(book.getBookTitle().getTitleName())
-                            .rentedTime(book.getRentedTime())
-                            .amount(book.getAmount())
-                            .penalties(currentPenalties)
-                            .build();
-            dtos.add(dto);
-        }
-
-        return dtos;
     }
 
     private List<Penalty> rentedBookPenaltiesToPenalties(List<RentedBookPenalty> rentedBookPenalties, boolean changeOrigin) {
