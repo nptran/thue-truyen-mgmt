@@ -49,7 +49,8 @@
                             <th>Mã</th>
                             <th>Tên Đầu Truyện</th>
                             <th>Ngày Mượn</th>
-                            <th>Giá Thuê</th>
+                            <th>Giá Thuê (Ngày)</th>
+                            <th>Tiền Thuê</th>
                             <th>Lỗi Truyện Hiện Tại</th>
                             <th>Cập Nhật Lỗi Truyện</th>
                         </tr>
@@ -61,6 +62,7 @@
                             <td th:text="${book.titleName}"></td>
                             <td th:text="${book.rentedTime.toString()}"></td>
                             <td th:text="${#numbers.formatCurrency(book.amount)}"></td>
+                            <td th:text="${#numbers.formatCurrency(book.amountTilToday)}"></td>
                             <td>
                                 <ul class="list-group">
                                     <li class="list-group-item" th:each="p, stat : ${book.penalties}"

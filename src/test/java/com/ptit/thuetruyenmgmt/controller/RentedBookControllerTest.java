@@ -296,10 +296,8 @@ public class RentedBookControllerTest {
 
         // book1
         when(service.getRentedBookById(b1.getId())).thenReturn(b1);
-        when(service.rentedBookPenaltiesToPenalties(b1.getPenalties())).thenReturn(pb1);
         // book2
         when(service.getRentedBookById(b2.getId())).thenReturn(b2);
-        when(service.rentedBookPenaltiesToPenalties(b2.getPenalties())).thenReturn(pb2);
         // book3 - không có lỗi
         when(service.getRentedBookById(b3.getId())).thenReturn(b3);
 
@@ -315,9 +313,7 @@ public class RentedBookControllerTest {
 
         verify(service, times(1)).getRentedBooksById(rentedBookHasPenaltiesIds);
         verify(service, times(1)).getRentedBookById(b1.getId());
-        verify(service, times(1)).rentedBookPenaltiesToPenalties(b1.getPenalties());
         verify(service, times(1)).getRentedBookById(b2.getId());
-        verify(service, times(1)).rentedBookPenaltiesToPenalties(b2.getPenalties());
         verify(service, times(1)).getRentedBookById(b3.getId());
         verify(penaltyService, times(1)).getAllPenalties();
 
@@ -440,8 +436,6 @@ public class RentedBookControllerTest {
                         .build();
 
         when(service.getRentedBookById(book.getId())).thenReturn(book);
-        when(service.rentedBookPenaltiesToPenalties(book.getPenalties()))
-                .thenReturn(new ArrayList<>()); // Chưa có lỗi nên trả về empty
         when(penaltyService.getAllPenalties()).thenReturn(ALL_PENALTIES);
 
         this.mvc.perform(
@@ -462,7 +456,6 @@ public class RentedBookControllerTest {
                 .andExpect(model().attribute("allPenalties", is(ALL_PENALTIES)));
 
         verify(service, times(1)).getRentedBookById(book.getId());
-        verify(service, times(1)).rentedBookPenaltiesToPenalties(book.getPenalties());
         verify(penaltyService, times(1)).getAllPenalties();
 
         verifyNoMoreInteractions(service);
@@ -493,7 +486,6 @@ public class RentedBookControllerTest {
                         .build();
 
         when(service.getRentedBookById(book.getId())).thenReturn(book);
-        when(service.rentedBookPenaltiesToPenalties(book.getPenalties())).thenReturn(tmpPenalties);
         when(penaltyService.getAllPenalties()).thenReturn(ALL_PENALTIES);
 
         this.mvc.perform(
@@ -504,7 +496,6 @@ public class RentedBookControllerTest {
                 .andExpect(model().attribute("allPenalties", is(ALL_PENALTIES)));
 
         verify(service, times(1)).getRentedBookById(book.getId());
-        verify(service, times(1)).rentedBookPenaltiesToPenalties(book.getPenalties());
         verify(penaltyService, times(1)).getAllPenalties();
 
         verifyNoMoreInteractions(service);
@@ -533,7 +524,6 @@ public class RentedBookControllerTest {
                         .build();
 
         when(service.getRentedBookById(book.getId())).thenReturn(book);
-        when(service.rentedBookPenaltiesToPenalties(book.getPenalties())).thenReturn(tmpPenalties);
         when(penaltyService.getAllPenalties()).thenReturn(EMPTY_PENALTIES);
 
         this.mvc.perform(
@@ -544,7 +534,6 @@ public class RentedBookControllerTest {
                 .andExpect(model().attribute("allPenalties", is(EMPTY_PENALTIES)));   // Kiểm tra lỗi có sẵn
 
         verify(service, times(1)).getRentedBookById(book.getId());
-        verify(service, times(1)).rentedBookPenaltiesToPenalties(book.getPenalties());
         verify(penaltyService, times(1)).getAllPenalties();
 
         verifyNoMoreInteractions(service);

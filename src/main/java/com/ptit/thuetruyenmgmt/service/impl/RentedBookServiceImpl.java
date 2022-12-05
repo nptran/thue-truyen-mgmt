@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.swing.text.html.Option;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -86,17 +88,4 @@ public class RentedBookServiceImpl implements RentedBookService {
         return optional.get();
     }
 
-
-    @Override
-    public List<Penalty> rentedBookPenaltiesToPenalties(List<RentedBookPenalty> rentedBookPenalties) {
-        List<Penalty> penalties = new ArrayList<>();
-        if (rentedBookPenalties != null) {
-            for (RentedBookPenalty r : rentedBookPenalties) {
-                Penalty p = r.getPenalty();
-                p.setRecommendedFee(r.getFee());
-                penalties.add(p);
-            }
-        }
-        return penalties;
-    }
 }

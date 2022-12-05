@@ -4,6 +4,7 @@ import com.ptit.thuetruyenmgmt.exception.FailedToResetBookPenaltiesException;
 import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.*;
 import com.ptit.thuetruyenmgmt.model.key.RentedBookPenaltyKey;
+import com.ptit.thuetruyenmgmt.model.request.RentedBookDTO;
 import com.ptit.thuetruyenmgmt.repository.RentedBookPenaltyRepository;
 import com.ptit.thuetruyenmgmt.repository.RentedBookRepository;
 import com.ptit.thuetruyenmgmt.service.impl.RentedBookServiceImpl;
@@ -537,7 +538,7 @@ public class RentedBookServiceTest {
         expected.add(Penalty.builder().id(1).recommendedFee(1000).build());
         expected.add(Penalty.builder().id(2).recommendedFee(1000).build());
 
-        List<Penalty> actual = service.rentedBookPenaltiesToPenalties(mock);
+        List<Penalty> actual = RentedBookDTO.rentedBookPenaltiesToPenalties(mock);
 
         assertEquals(actual, expected);
 
@@ -551,7 +552,7 @@ public class RentedBookServiceTest {
      */
     @Test
     void whenRentedBookPenaltiesToPenalties_shouldReturnEmpty() {
-        List<Penalty> actual = service.rentedBookPenaltiesToPenalties(null);
+        List<Penalty> actual = RentedBookDTO.rentedBookPenaltiesToPenalties(null);
 
         assertEquals(actual, new ArrayList<>());
 

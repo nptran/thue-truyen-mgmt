@@ -25,6 +25,7 @@ public class RentedBookDTOTest implements EntityTest {
     private final String expectedTitleName = "Tiêu Đề";
     private final LocalDateTime expectedRentedTime = LocalDateTime.of(2022, 10, 10, 10, 10, 10);
     private final double expectedAmount = 2000.99;
+    private final double expectedAmountTilToday = 2000.99;
     private List<Penalty> expectedPenalties;
 
 
@@ -34,6 +35,7 @@ public class RentedBookDTOTest implements EntityTest {
     private Field titleName;
     private Field rentedTime;
     private Field amount;
+    private Field amountTilToday;
     private Field penalties;
 
 
@@ -65,6 +67,7 @@ public class RentedBookDTOTest implements EntityTest {
         titleName = rentedBookDTO.getClass().getDeclaredField("titleName");
         rentedTime = rentedBookDTO.getClass().getDeclaredField("rentedTime");
         amount = rentedBookDTO.getClass().getDeclaredField("amount");
+        amountTilToday = rentedBookDTO.getClass().getDeclaredField("amountTilToday");
         penalties = rentedBookDTO.getClass().getDeclaredField("penalties");
 
         customerId.setAccessible(true);
@@ -73,6 +76,7 @@ public class RentedBookDTOTest implements EntityTest {
         titleName.setAccessible(true);
         rentedTime.setAccessible(true);
         amount.setAccessible(true);
+        amountTilToday.setAccessible(true);
         penalties.setAccessible(true);
     }
 
@@ -86,6 +90,7 @@ public class RentedBookDTOTest implements EntityTest {
                 expectedTitleName,
                 expectedRentedTime,
                 expectedAmount,
+                expectedAmountTilToday,
                 expectedPenalties
         );
 
@@ -102,6 +107,7 @@ public class RentedBookDTOTest implements EntityTest {
                 .titleName(expectedTitleName)
                 .rentedTime(expectedRentedTime)
                 .amount(expectedAmount)
+                .amountTilToday(expectedAmountTilToday)
                 .penalties(expectedPenalties)
                 .build();
 
@@ -117,6 +123,7 @@ public class RentedBookDTOTest implements EntityTest {
         rentedBookDTO.setTitleName(expectedTitleName);
         rentedBookDTO.setRentedTime(expectedRentedTime);
         rentedBookDTO.setAmount(expectedAmount);
+        rentedBookDTO.setAmount(expectedAmountTilToday);
         rentedBookDTO.setPenalties(expectedPenalties);
 
         assertFields(false);
@@ -131,6 +138,7 @@ public class RentedBookDTOTest implements EntityTest {
         titleName.set(rentedBookDTO, expectedTitleName);
         rentedTime.set(rentedBookDTO, expectedRentedTime);
         amount.set(rentedBookDTO, expectedAmount);
+        amount.set(rentedBookDTO, expectedAmountTilToday);
         penalties.set(rentedBookDTO, expectedPenalties);
 
         assertFields(true);
@@ -160,6 +168,7 @@ public class RentedBookDTOTest implements EntityTest {
             assertEquals(expectedTitleName, titleName.get(rentedBookDTO));
             assertEquals(expectedRentedTime, rentedTime.get(rentedBookDTO));
             assertEquals(expectedAmount, amount.get(rentedBookDTO));
+            assertEquals(expectedAmountTilToday, amount.get(rentedBookDTO));
             assertEquals(expectedPenalties, penalties.get(rentedBookDTO));
             return;
         }
@@ -170,6 +179,7 @@ public class RentedBookDTOTest implements EntityTest {
         assertEquals(expectedTitleName, rentedBookDTO.getTitleName());
         assertEquals(expectedRentedTime, rentedBookDTO.getRentedTime());
         assertEquals(expectedAmount, rentedBookDTO.getAmount());
+        assertEquals(expectedAmountTilToday, rentedBookDTO.getAmount());
         assertEquals(expectedPenalties, rentedBookDTO.getPenalties());
     }
 

@@ -40,7 +40,8 @@
                             <th>Mã</th>
                             <th>Tên Đầu Truyện</th>
                             <th>Ngày Mượn</th>
-                            <th>Giá Thuê</th>
+                            <th>Giá Thuê (Ngày)</th>
+                            <th>Tiền Thuê</th>
                             <th>Chọn Trả</th>
                         </tr>
                         </thead>
@@ -48,11 +49,12 @@
                         <th:block th:each="book,iterStat : ${allRentedBooks}">
                             <tr class="form-group">
                                 <td th:text="${iterStat.count}"></td>
-                                <td th:text="${book?.bookTitle?.code}"></td>
-                                <td th:text="${book?.bookTitle?.titleName}"></td>
+                                <td th:text="${book?.code}"></td>
+                                <td th:text="${book?.titleName}"></td>
                                 <td th:text="${book?.rentedTime}"></td>
                                 <td th:text="${#numbers.formatCurrency(book?.amount)}"></td>
-                                <td><input class="form-control" type="checkbox" name="willBeReturnedBooks" th:field="*{willBeReturnedBooks}" th:value="${book.id}"/></td>
+                                <td th:text="${#numbers.formatCurrency(book?.amountTilToday)}"></td>
+                                <td><input class="form-control" type="checkbox" name="willBeReturnedBooks" th:field="*{willBeReturnedBooks}" th:value="${book.rentedBookId}"/></td>
                                 <!--            <td><a th:href="@{/student/{id}/delete(id=${customer.id})}"><span-->
                                 <!--                    class="glyphicon glyphicon-trash"></span></a></td>-->
                             </tr>

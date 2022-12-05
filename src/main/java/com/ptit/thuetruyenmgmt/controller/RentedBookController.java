@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,13 +54,15 @@ public class RentedBookController {
         session.setAttribute("customerId", id);
         ModelAndView mav = new ModelAndView("gd-truyen-kh");
         List<RentedBook> allRentedBooks = service.getRentedBooksByCustomer(id);
+        List<RentedBookDTO> allRentedBooksInfo = RentedBookDTO.rentedBooksToRentedBookDTOs(allRentedBooks);
         if (allRentedBooks.isEmpty()) mav.setStatus(HttpStatus.NO_CONTENT);
         ReadyToReturnBooks wrapper = new ReadyToReturnBooks();
         wrapper.setCustomerId(id);
         String searchKw = (String) session.getAttribute("kwName");
         mav.addObject("searchKw", searchKw);
         mav.addObject("selectedBooks", wrapper);
-        mav.addObject("allRentedBooks", allRentedBooks);
+        mav.addObject("allRentedBooks", allRentedBooksInfo);
+        mav.addObject("returnTime", LocalDate.now());
         return mav;
     }
 
@@ -89,9 +92,7 @@ public class RentedBookController {
         session.setAttribute("selectedBookIds", selectedBookIds);
 
         // Chuyển hướng sang dựng giao diện tra-truyen
-        ModelAndView mav = new ModelAndView("redirect:/rented-book/selected-of=" + customerId);
-
-        return mav;
+        return new ModelAndView("redirect:/rented-book/selected-of=" + customerId);
     }
 
 
@@ -113,7 +114,7 @@ public class RentedBookController {
         if (selectedBooks.isEmpty()) mav.setStatus(HttpStatus.NO_CONTENT);
 
         // Dựng giao diện tra-truyen
-        List<RentedBookDTO> selectedBookDtos = rentedBooksToRentedBookDTOs(selectedBooks);
+        List<RentedBookDTO> selectedBookDtos = RentedBookDTO.rentedBooksToRentedBookDTOs(selectedBooks);
         mav.addObject("returnBookReq", new ReturnRentedBookRequest(customerId, selectedBookDtos));
         mav.addObject("allPenalties", penaltyService.getAllPenalties());
 
@@ -139,7 +140,7 @@ public class RentedBookController {
             mav.addObject("allPenalties", null);
             return mav;
         }
-        List<Penalty> currentPenalties = service.rentedBookPenaltiesToPenalties(originalRentedBook.getPenalties());
+        List<Penalty> currentPenalties = RentedBookDTO.rentedBookPenaltiesToPenalties(originalRentedBook.getPenalties());
         List<Integer> currentPenaltiesIds = currentPenalties.stream().map(Penalty::getId).collect(Collectors.toList());
         List<Penalty> allAvailablePenalties = penaltyService.getAllPenalties();
         if (allAvailablePenalties.isEmpty()) mav.setStatus(HttpStatus.NO_CONTENT);
@@ -235,30 +236,7 @@ public class RentedBookController {
 
         // Nếu lưu thành công chuyển hướng về trang Trả truyện
         redirect.addFlashAttribute("savePenaltiesSuccess", "Cập nhật lỗi truyện thành công!");
-        ModelAndView mav = new ModelAndView("redirect:/rented-book/selected-of=" + originalRentedBook.getCustomer().getId());
-        return mav;
-    }
-
-
-    private List<RentedBookDTO> rentedBooksToRentedBookDTOs(List<RentedBook> rentedBooks) {
-
-        List<RentedBookDTO> rentedBookDtos = new ArrayList<>();
-        for (RentedBook book : rentedBooks) {
-            RentedBook originalBook = service.getRentedBookById(book.getId());
-            List<Penalty> currentPenalties = originalBook.getPenalties() == null ? new ArrayList<>() : service.rentedBookPenaltiesToPenalties(originalBook.getPenalties());
-
-            RentedBookDTO pobDto = RentedBookDTO.builder()
-                    .rentedBookId(originalBook.getId())
-                    .code(originalBook.getBookTitle().getCode())
-                    .titleName(originalBook.getBookTitle().getTitleName())
-                    .rentedTime(originalBook.getRentedTime())
-                    .amount(originalBook.getAmount())
-                    .penalties(currentPenalties)
-                    .build();
-            rentedBookDtos.add(pobDto);
-        }
-
-        return rentedBookDtos;
+        return new ModelAndView("redirect:/rented-book/selected-of=" + originalRentedBook.getCustomer().getId());
     }
 
 }
