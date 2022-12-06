@@ -123,15 +123,10 @@ public class BillServiceTest {
      */
     @Test
     void whenCreatePayInfo_emptyBooks_shouldThrowNoneSelectedBookToReturnException() {
-        Staff mockStaff = Staff.staffBuilder().id(1).build();
-        when(staffRepository.findById(mockStaff.getId())).thenReturn(Optional.of(mockStaff));
-
-        assertThatThrownBy(() -> service.createPayInfo(new ArrayList<>(), mockStaff.getId()))
+        assertThatThrownBy(() -> service.createPayInfo(new ArrayList<>(), 1))
                 .isInstanceOf(NoneSelectedBookToReturnException.class);
 
-        verify(staffRepository, times(1)).findById(1);
-
-        verifyNoMoreInteractions(staffRepository);
+        verifyNoInteractions(staffRepository);
         verifyNoInteractions(repository);
         verifyNoInteractions(rentedBookRepository);
     }
@@ -143,15 +138,10 @@ public class BillServiceTest {
      */
     @Test
     void whenCreatePayInfo_nullBooks_shouldThrowNoneSelectedBookToReturnException() {
-        Staff mockStaff = Staff.staffBuilder().id(1).build();
-        when(staffRepository.findById(mockStaff.getId())).thenReturn(Optional.of(mockStaff));
-
-        assertThatThrownBy(() -> service.createPayInfo(null, mockStaff.getId()))
+        assertThatThrownBy(() -> service.createPayInfo(null, 1))
                 .isInstanceOf(NoneSelectedBookToReturnException.class);
 
-        verify(staffRepository, times(1)).findById(1);
-
-        verifyNoMoreInteractions(staffRepository);
+        verifyNoInteractions(staffRepository);
         verifyNoInteractions(repository);
         verifyNoInteractions(rentedBookRepository);
     }
