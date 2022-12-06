@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface RentedBookRepository extends JpaRepository<RentedBook, Integer> {
 
-    List<RentedBook> findAllByCustomer_IdAndIsPaidIsFalse(int customerId);
+//    List<RentedBook> findAllByCustomer_IdAndIsPaidIsFalse(int customerId);
 
 //    List<RentedBook> findAllByIdAndIsPaidIsFalse(List<Integer> ids);
 

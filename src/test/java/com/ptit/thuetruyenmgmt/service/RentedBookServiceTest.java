@@ -45,49 +45,6 @@ public class RentedBookServiceTest {
 
 
     /**
-     * {@link RentedBookServiceImpl#getRentedBooksByCustomer(int)}
-     *
-     * @POSITIVE_CASE: KH đang mượn vài đầu truyện
-     * Repository có trả về ds RentedBook của KH
-     */
-    @Test
-    void whenGetRentedBooksByCustomer_haveRentedBooks() {
-        List<RentedBook> mock = IntStream.range(0, 5)
-                .mapToObj(i -> RentedBook.builder().id(i).customer(Customer.builder().id(1).build()).build())
-                .collect(Collectors.toList());
-        Mockito.when(repository.findAllByCustomer_IdAndIsPaidIsFalse(1)).thenReturn(mock);
-        List<RentedBook> received = service.getRentedBooksByCustomer(1);
-
-        Assertions.assertIterableEquals(received, mock);
-
-        verify(repository, times(1)).findAllByCustomer_IdAndIsPaidIsFalse(1);
-
-        verifyNoMoreInteractions(repository);
-        verifyNoInteractions(rentedBookPenaltyRepository);
-    }
-
-
-    /**
-     * {@link RentedBookServiceImpl#getRentedBooksByCustomer(int)}
-     *
-     * @POSITIVE_CASE: KH không mượn truyện nào hoặc KH không tồn tại
-     * Repository trả về ds rỗng RentedBook
-     */
-    @Test
-    void whenGetRentedBooksByCustomer_notHaveRentedBook() {
-        Mockito.when(repository.findAllByCustomer_IdAndIsPaidIsFalse(1)).thenReturn(new ArrayList<>());
-        List<RentedBook> received = service.getRentedBooksByCustomer(1);
-
-        Assertions.assertIterableEquals(received, new ArrayList<>());
-
-        verify(repository, times(1)).findAllByCustomer_IdAndIsPaidIsFalse(1);
-
-        verifyNoMoreInteractions(repository);
-        verifyNoInteractions(rentedBookPenaltyRepository);
-    }
-
-
-    /**
      * {@link RentedBookServiceImpl#getRentedBookById(int)}
      *
      * @POSITIVE_CASE: Repository trả về 1 RentedBook
@@ -109,17 +66,15 @@ public class RentedBookServiceTest {
                 .isPaid(false).build();
 
         when(repository.findById(1)).thenReturn(Optional.of(mockRentedBook));
-        when(rentedBookPenaltyRepository.findAllByRentedBook_Id(1)).thenReturn(mockRBP);
 
         RentedBook received = service.getRentedBookById(1);
 
         assertEquals(received, mockRentedBook);
 
         verify(repository, times(1)).findById(1);
-        verify(rentedBookPenaltyRepository, times(1)).findAllByRentedBook_Id(1);
 
         verifyNoMoreInteractions(repository);
-        verifyNoMoreInteractions(rentedBookPenaltyRepository);
+        verifyNoInteractions(rentedBookPenaltyRepository);
     }
 
 
@@ -137,7 +92,6 @@ public class RentedBookServiceTest {
                 .isPaid(false).build();
 
         when(repository.findById(1)).thenReturn(Optional.of(mockRentedBook));
-        when(rentedBookPenaltyRepository.findAllByRentedBook_Id(1)).thenReturn(new ArrayList<>());
         mockRentedBook.setPenalties(new ArrayList<>());
 
         RentedBook received = service.getRentedBookById(1);
@@ -145,10 +99,9 @@ public class RentedBookServiceTest {
         assertEquals(received, mockRentedBook);
 
         verify(repository, times(1)).findById(1);
-        verify(rentedBookPenaltyRepository, times(1)).findAllByRentedBook_Id(1);
 
         verifyNoMoreInteractions(repository);
-        verifyNoMoreInteractions(rentedBookPenaltyRepository);
+        verifyNoInteractions(rentedBookPenaltyRepository);
     }
 
 

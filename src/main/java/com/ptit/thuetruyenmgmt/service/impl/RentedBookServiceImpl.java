@@ -26,10 +26,10 @@ public class RentedBookServiceImpl implements RentedBookService {
     private static final String RESOURCE_NAME = RentedBook.class.getSimpleName();
 
 
-    @Override
-    public List<RentedBook> getRentedBooksByCustomer(int customerId) {
-        return repository.findAllByCustomer_IdAndIsPaidIsFalse(customerId);
-    }
+//    @Override
+//    public List<RentedBook> getRentedBooksByCustomer(int customerId) {
+//        return repository.findAllByCustomer_IdAndIsPaidIsFalse(customerId);
+//    }
 
 
     @Override

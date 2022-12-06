@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface RentedBookService {
 
-    List<RentedBook> getRentedBooksByCustomer(int customerId);
+//    List<RentedBook> getRentedBooksByCustomer(int customerId);
 
     RentedBook getRentedBookById(int rentedBookId);
 
