@@ -45,9 +45,6 @@
                         </a> trước đã!
                     </h3>
                 </th:block>
-                <th:block th:if="${#lists.isEmpty(allPenalties)}">
-                    <h3>Danh sách Lỗi truyện trống! Thêm ngay!</h3>
-                </th:block>
 
                 <!-- NẾU CÓ KẾT QUẢ -->
                 <th:block th:unless="${#lists.isEmpty(returnBookReq.rentedBookDtos)}">

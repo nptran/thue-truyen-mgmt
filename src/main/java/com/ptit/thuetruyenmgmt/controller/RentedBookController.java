@@ -1,5 +1,6 @@
 package com.ptit.thuetruyenmgmt.controller;
 
+import com.ptit.thuetruyenmgmt.exception.FailedToResetBookPenaltiesException;
 import com.ptit.thuetruyenmgmt.exception.NotFoundException;
 import com.ptit.thuetruyenmgmt.model.Customer;
 import com.ptit.thuetruyenmgmt.model.Penalty;
@@ -65,13 +66,14 @@ public class RentedBookController {
             return new ModelAndView("redirect:/customer");
         }
 
+        List<RentedBook> allRentedBooks = new ArrayList<>(customer.getRentedBooks());
+        allRentedBooks.removeIf(RentedBook::isPaid);
         ModelAndView mav = new ModelAndView("gd-truyen-kh");
-        List<RentedBook> allRentedBooks = service.getRentedBooksByCustomer(id);
-        List<RentedBookDTO> allRentedBooksInfo = RentedBookDTO.rentedBooksToRentedBookDTOs(allRentedBooks);
         if (allRentedBooks.isEmpty()) mav.setStatus(HttpStatus.NO_CONTENT);
+        String searchKw = (String) session.getAttribute("kwName");
+        List<RentedBookDTO> allRentedBooksInfo = RentedBookDTO.rentedBooksToRentedBookDTOs(allRentedBooks);
         ReadyToReturnBooks wrapper = new ReadyToReturnBooks();
         wrapper.setCustomerId(id);
-        String searchKw = (String) session.getAttribute("kwName");
         mav.addObject("searchKw", searchKw);
         mav.addObject("selectedBooks", wrapper);
         mav.addObject("allRentedBooks", allRentedBooksInfo);
@@ -127,17 +129,17 @@ public class RentedBookController {
             return new ModelAndView("redirect:/customer");
         }
 
-        ModelAndView mav = new ModelAndView("gd-tra-truyen");
 
         // Lấy ra danh sách các truyện đã chọn từ session
         List<Integer> ids = (List<Integer>) session.getAttribute("selectedBookIds");
         List<RentedBook> selectedBooks = service.getRentedBooksById(ids);
-        if (selectedBooks.isEmpty()) mav.setStatus(HttpStatus.NO_CONTENT);
+        List<RentedBookDTO> selectedBookDtos = RentedBookDTO.rentedBooksToRentedBookDTOs(selectedBooks);
+        ReturnRentedBookRequest req = new ReturnRentedBookRequest(customerId, selectedBookDtos);
 
         // Dựng giao diện tra-truyen
-        List<RentedBookDTO> selectedBookDtos = RentedBookDTO.rentedBooksToRentedBookDTOs(selectedBooks);
-        mav.addObject("returnBookReq", new ReturnRentedBookRequest(customerId, selectedBookDtos));
-        mav.addObject("allPenalties", penaltyService.getAllPenalties());
+        ModelAndView mav = new ModelAndView("gd-tra-truyen");
+        if (selectedBooks.isEmpty()) mav.setStatus(HttpStatus.NO_CONTENT);
+        mav.addObject("returnBookReq", req);
         mav.addObject("customerInfo", customer);
 
         return mav;
@@ -152,20 +154,17 @@ public class RentedBookController {
      */
     @RequestMapping("/rented-book/{id}/penalties")
     public ModelAndView getGDCapNhatLoiTruyen(@PathVariable(name = "id") Integer bookId) {
-        ModelAndView mav = new ModelAndView("gd-cap-nhat-loi-truyen");
         RentedBook originalRentedBook;
         try {
             originalRentedBook = service.getRentedBookById(bookId);
         } catch (NotFoundException e) {
+            ModelAndView mav = new ModelAndView("gd-cap-nhat-loi-truyen");
             mav.setStatus(HttpStatus.NOT_FOUND);
-            mav.addObject("rentedBook", null);
-            mav.addObject("allPenalties", null);
             return mav;
         }
         List<Penalty> currentPenalties = RentedBookDTO.rentedBookPenaltiesToPenalties(originalRentedBook.getPenalties());
         List<Integer> currentPenaltiesIds = currentPenalties.stream().map(Penalty::getId).collect(Collectors.toList());
         List<Penalty> allAvailablePenalties = penaltyService.getAllPenalties();
-        if (allAvailablePenalties.isEmpty()) mav.setStatus(HttpStatus.NO_CONTENT);
 
         List<Penalty> tmpPenalties = new ArrayList<>();
         // Đặt lại ds penalty để chỉ tick những ô penalty hiện tại của originalRentedBook
@@ -193,6 +192,8 @@ public class RentedBookController {
                         .penalties(tmpPenalties)
                         .build();
 
+        ModelAndView mav = new ModelAndView("gd-cap-nhat-loi-truyen");
+        if (allAvailablePenalties.isEmpty()) mav.setStatus(HttpStatus.NO_CONTENT);
         mav.addObject("rentedBook", rentedBookDTO);
         mav.addObject("allPenalties", allAvailablePenalties);
         return mav;
@@ -207,7 +208,7 @@ public class RentedBookController {
      * @return `tra-truyen` - nếu cập nhật thành công
      */
     @PostMapping("/rented-book/{id}/save-penalties")
-    public ModelAndView saveRentedBook(@Valid @ModelAttribute("rentedBook") RentedBookDTO rentedBook,
+    public ModelAndView updatePenaltiesOfRentedBook(@Valid @ModelAttribute("rentedBook") RentedBookDTO rentedBook,
                                        BindingResult result,
                                        RedirectAttributes redirect,
                                        @PathVariable(name = "id") Integer rentedBookId) {
@@ -225,6 +226,7 @@ public class RentedBookController {
         selectedPenalties.removeIf(penalty -> penalty.getId() == null); // Remove NULL penalties (no selected)
         List<Integer> newPenIds = selectedPenalties.stream().map(Penalty::getId).collect(Collectors.toList());
 
+        // Lấy ID các Penalty hiện tại mà không còn nằm trong các Penalty mới
         List<RentedBookPenaltyKey> removedIds = new ArrayList<>();
         for (RentedBookPenalty p : currPenalties) {
             int id = p.getId().getPenaltyId();
@@ -233,6 +235,7 @@ public class RentedBookController {
             }
         }
 
+        // lấy thông tin các Penalty mới
         List<RentedBookPenalty> penalties = new ArrayList<>();
         for (Penalty penalty : selectedPenalties) {
             Penalty originalPenalty = penaltyService.getPenaltyById(penalty.getId());
@@ -249,7 +252,7 @@ public class RentedBookController {
         // Cập nhật lại RentedBookPenalty
         try {
             service.addPenaltiesIntoRentedBook(penalties, removedIds, originalRentedBook.getId());
-        } catch (Exception e) {
+        } catch (FailedToResetBookPenaltiesException | NotFoundException e) {
             ModelAndView mav = new ModelAndView("redirect:/rented-book/" + rentedBookId + "/penalties");
             redirect.addFlashAttribute("failedMessage", e.getMessage());
             mav.setStatus(HttpStatus.NOT_MODIFIED);

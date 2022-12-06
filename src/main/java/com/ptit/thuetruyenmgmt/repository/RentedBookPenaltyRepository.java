@@ -14,10 +14,6 @@ import java.util.List;
 @Repository
 public interface RentedBookPenaltyRepository extends JpaRepository<RentedBookPenalty, RentedBookPenaltyKey> {
 
-    @Query(value = "CALL CLEAN_PENALTIES_OF_RENTED_BOOK(:bookId);", nativeQuery = true)
-    int cleanPenaltiesOfRentedBook(@Param("bookId") Integer rentedBookId);
-
-
     List<RentedBookPenalty> findAllByRentedBook_Id(Integer rentedBookId);
 
 }

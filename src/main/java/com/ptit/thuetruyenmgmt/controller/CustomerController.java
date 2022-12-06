@@ -31,11 +31,11 @@ public class CustomerController {
     @GetMapping("/customer/search")
     public ModelAndView searchCustomer(@RequestParam(name = "kw-name", defaultValue = "", required = false) String customerName,
                                        HttpSession session) {
+        List<Customer> foundCustomers = service.getCustomerByName(customerName);
+
         ModelAndView mav = new ModelAndView("gd-tim-kh");
         mav.addObject("kwName", customerName);
         session.setAttribute("kwName", customerName);
-
-        List<Customer> foundCustomers = service.getCustomerByName(customerName);
         mav.addObject("customers", foundCustomers);
 
         return mav;

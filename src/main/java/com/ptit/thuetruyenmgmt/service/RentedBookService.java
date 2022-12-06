@@ -16,6 +16,6 @@ public interface RentedBookService {
 
     List<RentedBook> getRentedBooksById(List<Integer> rentedBookIds);
 
-    RentedBook addPenaltiesIntoRentedBook(List<RentedBookPenalty> penalties, List<RentedBookPenaltyKey> removedPenalties, int id);
+    RentedBook addPenaltiesIntoRentedBook(List<RentedBookPenalty> penalties, List<RentedBookPenaltyKey> changedPenalties, int id);
 
 }

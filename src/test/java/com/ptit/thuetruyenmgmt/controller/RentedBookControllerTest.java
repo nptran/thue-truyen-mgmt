@@ -539,13 +539,13 @@ public class RentedBookControllerTest {
 
 
     /**
-     * {@link RentedBookController#saveRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 1
+     * {@link RentedBookController#updatePenaltiesOfRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 1
      *
      * @POSITIVE: Truyện hiện tại không có lỗi, có lỗi truyện mới được chọn lưu, không phí nào bị bỏ trống
      * → Lưu thành công, chuyển về gd-tra-truyen
      */
     @Test
-    void whenSaveRentedBook_thenReturn201AndRedirectToGDTraTruyen() throws Exception {
+    void whenUpdatePenaltiesOfRentedBook_thenReturn201AndRedirectToGDTraTruyen() throws Exception {
         RentedBook book = mockRentedBook(ALL_PENALTIES, 100, customer, false);
 
         RentedBook updatedBook = mockRentedBook(ALL_PENALTIES, 100, customer, true, 1500, 2000);
@@ -591,13 +591,13 @@ public class RentedBookControllerTest {
 
 
     /**
-     * {@link RentedBookController#saveRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 2
+     * {@link RentedBookController#updatePenaltiesOfRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 2
      *
      * @POSITIVE: Truyện hiện tại đã có có lỗi, có thêm lỗi truyện mới được chọn lưu và một lỗi cũ bị xoá, không phí nào bị bỏ trống
      * → Lưu thành công, chuyển về gd-tra-truyen
      */
     @Test
-    void whenSaveRentedBook_case2() throws Exception {
+    void whenUpdatePenaltiesOfRentedBook_case2() throws Exception {
         // Truyện hiện đã có lỗi id=1,2
         RentedBook book = mockRentedBook(ALL_PENALTIES, 100, customer, true, 600, 1200);
         List<RentedBookPenaltyKey> idsToRemove = new ArrayList<>();
@@ -649,13 +649,13 @@ public class RentedBookControllerTest {
 
 
     /**
-     * {@link RentedBookController#saveRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 3
+     * {@link RentedBookController#updatePenaltiesOfRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 3
      *
      * @POSITIVE: Không có lỗi truyện nào được chọn lưu
      * → Lưu thành công, chuyển về gd-tra-truyen
      */
     @Test
-    void whenSaveRentedBook_case3() throws Exception {
+    void whenUpdatePenaltiesOfRentedBook_case3() throws Exception {
         // Truyện hiện tại có 2 lỗi
         RentedBook book = mockRentedBook(ALL_PENALTIES, 100, customer, true, 1500, 2000);
         List<RentedBookPenaltyKey> idsToRemove = getKeys(book.getPenalties());
@@ -693,13 +693,13 @@ public class RentedBookControllerTest {
 
 
     /**
-     * {@link RentedBookController#saveRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 4
+     * {@link RentedBookController#updatePenaltiesOfRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 4
      *
      * @POSITIVE: Phí phạt không hợp lệ
      * → Lưu không thành công, ở lại trang cap-nhat-loi-truyen
      */
     @Test
-    void whenSaveRentedBook_case4() throws Exception {
+    void whenUpdatePenaltiesOfRentedBook_case4() throws Exception {
         // Truyện hiện tại có 2 lỗi
         RentedBook book = mockRentedBook(ALL_PENALTIES, 100, customer, true, 1500, 2000);
         List<RentedBookPenaltyKey> idsToRemove = getKeys(book.getPenalties());
@@ -735,13 +735,13 @@ public class RentedBookControllerTest {
 
 
     /**
-     * {@link RentedBookController#saveRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 5
+     * {@link RentedBookController#updatePenaltiesOfRentedBook(RentedBookDTO, BindingResult, RedirectAttributes, Integer)}: Test Case 5
      *
      * @POSITIVE: Lỗi khi cập nhật lỗi truyện cho RentedBook
      * → 304 - Lưu không thành công, ở lại trang cap-nhat-loi-truyen
      */
     @Test
-    void whenSaveRentedBook_case5() throws Exception {
+    void whenUpdatePenaltiesOfRentedBook_case5() throws Exception {
         // Truyện hiện tại có 2 lỗi
         RentedBook book = mockRentedBook(ALL_PENALTIES, 100, customer, true, 1500, 2000);
         List<RentedBookPenaltyKey> idsToRemove = getKeys(book.getPenalties());

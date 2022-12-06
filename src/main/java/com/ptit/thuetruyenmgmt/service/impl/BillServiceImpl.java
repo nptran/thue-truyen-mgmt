@@ -36,15 +36,15 @@ public class BillServiceImpl implements BillService {
     @Override
     @Transactional
     public Bill createPayInfo(List<RentedBook> rentedBooks, Integer staffId) {
+        if (rentedBooks == null || rentedBooks.isEmpty()) {
+            throw new NoneSelectedBookToReturnException();
+        }
+
         Optional<Staff> staffOptional = staffRepository.findById(staffId);
         if (!staffOptional.isPresent()) {
             throw new NotFoundException(STAFF_RESOURCE);
         }
         Staff staff = staffOptional.get();
-
-        if (rentedBooks == null || rentedBooks.isEmpty()) {
-            throw new NoneSelectedBookToReturnException();
-        }
 
         LocalDateTime now = LocalDateTime.now();
         double totalAmount = 0;

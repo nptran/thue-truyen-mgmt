@@ -33,23 +33,23 @@ public class RentedBookDTO implements Serializable {
     @Valid
     private List<Penalty> penalties;
 
+    public static RentedBookDTO fromRentedBook(RentedBook rentedBook) {
+        return RentedBookDTO.builder()
+                .customerId(rentedBook.getCustomer().getId())
+                .rentedBookId(rentedBook.getId())
+                .code(rentedBook.getBookTitle().getCode())
+                .titleName(rentedBook.getBookTitle().getTitleName())
+                .rentedTime(rentedBook.getRentedTime())
+                .amount(rentedBook.getAmount())
+                .amountTilToday(calculateAmountTilToday(rentedBook))
+                .penalties(rentedBookPenaltiesToPenalties(rentedBook.getPenalties()))
+                .build();
+    }
 
     public static List<RentedBookDTO> rentedBooksToRentedBookDTOs(List<RentedBook> rentedBooks) {
         List<RentedBookDTO> rentedBookDtos = new ArrayList<>();
         for (RentedBook book : rentedBooks) {
-            List<Penalty> penaltiesOfBook = rentedBookPenaltiesToPenalties(book.getPenalties());
-
-            RentedBookDTO pobDto = RentedBookDTO.builder()
-                    .customerId(book.getCustomer().getId())
-                    .rentedBookId(book.getId())
-                    .code(book.getBookTitle().getCode())
-                    .titleName(book.getBookTitle().getTitleName())
-                    .rentedTime(book.getRentedTime())
-                    .amount(book.getAmount())
-                    .amountTilToday(calculateAmountTilToday(book))
-                    .penalties(penaltiesOfBook)
-                    .build();
-            rentedBookDtos.add(pobDto);
+            rentedBookDtos.add(fromRentedBook(book));
         }
 
         return rentedBookDtos;

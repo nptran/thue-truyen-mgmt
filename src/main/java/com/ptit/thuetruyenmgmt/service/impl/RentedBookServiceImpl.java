@@ -1,10 +1,7 @@
 package com.ptit.thuetruyenmgmt.service.impl;
 
-import com.ptit.thuetruyenmgmt.exception.FailedToPayException;
 import com.ptit.thuetruyenmgmt.exception.FailedToResetBookPenaltiesException;
 import com.ptit.thuetruyenmgmt.exception.NotFoundException;
-import com.ptit.thuetruyenmgmt.model.Customer;
-import com.ptit.thuetruyenmgmt.model.Penalty;
 import com.ptit.thuetruyenmgmt.model.RentedBook;
 import com.ptit.thuetruyenmgmt.model.RentedBookPenalty;
 import com.ptit.thuetruyenmgmt.model.key.RentedBookPenaltyKey;
@@ -15,9 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -44,9 +38,6 @@ public class RentedBookServiceImpl implements RentedBookService {
         if (!optional.isPresent()) {
             throw new NotFoundException(RESOURCE_NAME);
         }
-        RentedBook rentedBook = optional.get();
-        List<RentedBookPenalty> rentedBookPenalties = rentedBookPenaltyRepository.findAllByRentedBook_Id(rentedBookId);
-        rentedBook.setPenalties(rentedBookPenalties);
         return optional.get();
     }
 
