@@ -62,7 +62,13 @@ VALUES
     (1, 'P001', 'Nhà Xuất Bản', 'publisher01@mail.com', 'NXB Nhã Bắc', '089786567', 11),
     (2, 'P002', 'Nhà Xuất Bản', 'publisher02@mail.com', 'NXB Đoàn Kỳ', '089786567', 12),
     (3, 'P003', 'Nhà Xuất Bản', 'publisher03@mail.com', 'NXB Anh Hải', '089786567', 13),
-    (4, 'P004', 'Nhà Cung Cấp', 'publisher04@mail.com', 'NCC Kỳ Xuân', '089786567', 14);
+    (4, 'P004', 'Nhà Cung Cấp', 'publisher04@mail.com', 'NCC Kỳ Xuân', '089786567', 14),
+    (5, 'P005', 'Nhà Cung Cấp', 'publisher05@mail.com', 'NCC Phu Lai', '089786567', 15),
+    (6, 'P006', 'Nhà Cung Cấp', 'publisher06@mail.com', 'NCC Kim Kỳ', '089786567', 16),
+    (7, 'P007', 'Nhà Cung Cấp', 'publisher07@mail.com', 'NCC An An', '089786567', 17),
+    (8, 'P008', 'Nhà Cung Cấp', 'publisher08@mail.com', 'NCC Hồng Phúc', '089786567', 18),
+    (9, 'P009', 'Nhà Cung Cấp', 'publisher09@mail.com', 'NCC Phú Kỳ', '089786567', 19),
+    (10, 'P010', 'Nhà Cung Cấp', 'publisher10@mail.com', 'NCC Lam Xuân', '089786567', 20);
 
 -- BOOK TITLE
 INSERT INTO `thue-truyen-mgmt`.`book_title`
@@ -100,10 +106,12 @@ VALUES (1, 'Trang sách bị nhăn hoặc có vết gấp', 'Nhăn Sách', 500),
        (2, 'Trang sách bị rách nhỏ không ảnh hưởng đến nội dung', 'Rách Nhỏ', 1000),
        (3, 'Trang sách bị rách ảnh hưởng đến nội dung nhưng không quá 30%', 'Rách Lớn', 2000),
        (4, 'Trang sách bị rách quá 50% hoặc toàn bộ', 'Rách Hoàn Toàn', 5000),
-       (5, 'Trang sách bị dây bẩn nhưng không ảnh hưởng đến nội dung', 'Bẩn Nhẹ', 500),
-       (6, 'Trang sách bị dây bẩn ảnh hưởng đến không quá 20% nội dung', 'Bẩn Nặng', 1000),
-       (7, 'Trách sách bị dây bẩn ảnh hưởng quá 50% nội dung', 'Bẩn Toàn Bộ', 4000),
-       (8, 'Trả Chậm/Ngày', 'Trả Chậm', 1000);
+       (5, 'Trang sách bị dây bẩn nhưng không ảnh hưởng đến nội dung', 'Bẩn Ít', 500),
+       (6, 'Trang sách bị dây bẩn ảnh hưởng đến không quá 20% nội dung', 'Bẩn Nhẹ', 1000),
+       (7, 'Trang sách bị dây bẩn ảnh hưởng quá 50% nội dung', 'Bẩn Vừa', 4000),
+       (8, 'Trang sách bị dây bẩn ảnh hưởng quá 80% nội dung', 'Bẩn Nhiều', 4000),
+       (9, 'Trang sách bị dây bẩn ảnh hưởng quá 100% nội dung', 'Bẩn Toàn Bộ', 4000),
+       (10, 'Bìa sách bị rách', 'Rách Bìa', 1000);
 
 -- CUSTOMER
 INSERT INTO `thue-truyen-mgmt`.`customer` (`cccd`, `date_of_birth`, `email`, `phone`, `address_id`, `name_id`)

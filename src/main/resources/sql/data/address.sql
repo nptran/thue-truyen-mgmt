@@ -17,6 +17,12 @@ VALUES
     (12, 'Hải Phòng', 'An Dương', '109 Trần Phú'),
     (13, 'Hồ Chí Minh', 'Tân Phú', '99A KCN Bắc Bình'),
     (14, 'Đà Nẵng', 'Ngũ Hành Sơn', '669C Lê Trọng Tấn'),
+    (15, 'Lào Cai', 'An Dương', '6C Cao Tốc Hà Nội'),
+    (16, 'Đà Nẵng', 'Ngũ Hành Sơn', '669C Lê Trọng Tấn'),
+    (17, 'Đà Lạt', 'Ngũ Hành Sơn', '669C Lê Trọng Tấn'),
+    (18, 'Đà Nẵng', 'Đảo Rồng', '668C Lê Trọng Tấn'),
+    (19, 'Nghệ An', 'Tương Dương', 'KCN Tràng Thuận'),
+    (20, 'Đà Nẵng', 'Ngũ Hành Sơn', '602 Đồng Tâm'),
 
     -- Staff's address
     (21, 'Hà Nội', 'Hà Đông', '1B Trần Phú'),
