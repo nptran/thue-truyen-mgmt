@@ -62,8 +62,10 @@ public class RentedBookController {
         try {
             customer = customerService.getCustomerById(id);
         } catch (NotFoundException e) {
+            ModelAndView mav = new ModelAndView("redirect:/customer");
+            mav.setStatus(HttpStatus.NOT_FOUND);
             redirect.addFlashAttribute("errorNoti", "Khách hàng không tồn tại!");
-            return new ModelAndView("redirect:/customer");
+            return mav;
         }
 
         List<RentedBook> allRentedBooks = new ArrayList<>(customer.getRentedBooks());
@@ -125,10 +127,11 @@ public class RentedBookController {
         try {
             customer = customerService.getCustomerById(customerId);
         } catch (NotFoundException e) {
+            ModelAndView mav = new ModelAndView("redirect:/customer");
+            mav.setStatus(HttpStatus.NOT_FOUND);
             redirect.addFlashAttribute("errorNoti", "Khách hàng không tồn tại!");
-            return new ModelAndView("redirect:/customer");
+            return mav;
         }
-
 
         // Lấy ra danh sách các truyện đã chọn từ session
         List<Integer> ids = (List<Integer>) session.getAttribute("selectedBookIds");
